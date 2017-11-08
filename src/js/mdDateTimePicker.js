@@ -10,7 +10,7 @@
 * import necessary components
 */
 import moment from 'moment'
-import Draggabilly from 'draggabilly'
+// import Draggabilly from 'draggabilly'
 
 class mdDateTimePicker {
   /**
@@ -38,11 +38,12 @@ class mdDateTimePicker {
   constructor ({
     type,
     init = moment(),
-    past = moment().subtract(21, 'years'),
-    future = init,
+    past = moment().subtract(1, 'years'),
+    future = moment().add(21, 'years'),
     mode = false,
     orientation = 'LANDSCAPE',
     trigger = '',
+    now = 'now',
     ok = 'ok',
     cancel = 'cancel',
     colon = true,
@@ -58,6 +59,7 @@ class mdDateTimePicker {
     this._mode = mode
     this._orientation = orientation
     this._trigger = trigger
+    this._now = now
     this._ok = ok
     this._cancel = cancel
     this._colon = colon
@@ -207,7 +209,7 @@ class mdDateTimePicker {
     * @type {Array}
     */
     const sDialogEls = [
-      'viewHolder', 'years', 'header', 'cancel', 'ok', 'left', 'right', 'previous', 'current', 'next', 'subtitle', 'title', 'titleDay', 'titleMonth', 'AM', 'PM', 'needle', 'hourView', 'minuteView', 'hour', 'minute', 'fakeNeedle', 'circularHolder', 'circle', 'dotSpan'
+      'viewHolder', 'years', 'header', 'now', 'cancel', 'ok', 'left', 'right', 'previous', 'current', 'next', 'subtitle', 'title', 'titleDay', 'titleMonth', 'AM', 'PM', 'needle', 'hourView', 'minuteView', 'hour', 'minute', 'fakeNeedle', 'circularHolder', 'circle', 'dotSpan'
     ]
     let i = sDialogEls.length
     while (i--) {
@@ -318,6 +320,7 @@ class mdDateTimePicker {
     const action = document.createElement('div')
     const cancel = document.createElement('button')
     const ok = document.createElement('button')
+    const now = document.createElement('button')
     // ... add properties to them
     container.id = `mddtp-picker__${type}`
     container.classList.add('mddtp-picker')
@@ -486,7 +489,11 @@ class mdDateTimePicker {
     this._addId(ok, 'ok')
     ok.classList.add('mddtp-button')
     ok.setAttribute('type', 'button')
+    this._addId(now, 'now')
+    now.classList.add('mddtp-button')
+    now.setAttribute('type', 'button')
     // add actions
+    action.appendChild(now)
     action.appendChild(cancel)
     action.appendChild(ok)
     // add actions to body
@@ -720,7 +727,7 @@ class mdDateTimePicker {
       future += firstDayOfMonth - 1
     }
     if (this._sDialog.sDate.isSame(m, 'month')) {
-      selected = parseInt(moment(m).format('D'), 10)
+      selected = parseInt(moment(this._sDialog.sDate).format('D'), 10)
       selected += firstDayOfMonth - 1
     }
     for (let i = 0; i < 42; i++) {
@@ -737,6 +744,7 @@ class mdDateTimePicker {
       }
       if (today === i) {
         cell.classList.add(`${cellClass}--today`)
+        this.todaycell = cell
       }
       if (selected === i) {
         cell.classList.add(`${cellClass}--selected`)
@@ -750,7 +758,7 @@ class mdDateTimePicker {
     }
     // set inner html accordingly
     tr.appendChild(docfrag)
-    this._addCellClickEvent(tr)
+    this._addCellClickEvent(tr, this)
   }
 
   /**
@@ -986,18 +994,16 @@ class mdDateTimePicker {
     }
   }
 
-  _addCellClickEvent (el) {
-    const me = this
-    el.onclick = function (e) {
+  _cellClicked (e, currentDate) {
       if (e.target && e.target.nodeName === 'SPAN' && e.target.classList.contains('mddtp-picker__cell')) {
         const day = e.target.textContent
-        const currentDate = me._sDialog.tDate.date(day)
+        currentDate = currentDate || this._sDialog.tDate.date(day)
         const sId = 'mddtp-date__selected'
         const sClass = 'mddtp-picker__cell--selected'
         const selected = document.getElementById(sId)
-        const subtitle = me._sDialog.subtitle
-        const titleDay = me._sDialog.titleDay
-        const titleMonth = me._sDialog.titleMonth
+        const subtitle = this._sDialog.subtitle
+        const titleDay = this._sDialog.titleDay
+        const titleMonth = this._sDialog.titleMonth
         if (selected) {
           selected.classList.remove(sClass)
           selected.id = ''
@@ -1006,17 +1012,20 @@ class mdDateTimePicker {
         e.target.id = sId
 
         // update temp date object with the date selected
-        me._sDialog.sDate = currentDate.clone()
+        this._sDialog.sDate = currentDate.clone()
 
-        me._fillText(subtitle, currentDate.year())
-        me._fillText(titleDay, currentDate.format('ddd, '))
-        me._fillText(titleMonth, currentDate.format('MMM D'))
+        this._fillText(subtitle, currentDate.year())
+        this._fillText(titleDay, currentDate.format('ddd, '))
+        this._fillText(titleMonth, currentDate.format('MMM D'))
 
-        if (me._autoClose === true) {
-          me._sDialog.ok.onclick()
+        if (this._autoClose === true) {
+          this._sDialog.ok.onclick()
         }
       }
-    }
+  }
+
+  _addCellClickEvent (el, me) {
+    el.onclick = this._cellClicked.bind(me)
   }
 
   _toMoveMonth () {
@@ -1208,98 +1217,98 @@ class mdDateTimePicker {
     const rotate = 'mddtp-picker__cell--rotate-'
     let hOffset = circularHolder.getBoundingClientRect()
     let divides
-    const fakeNeedleDraggabilly = new Draggabilly(fakeNeedle, {
-      containment: true
-    })
-    fakeNeedleDraggabilly.on('pointerDown', () => {
-      // console.info ( 'pointerDown' , e );
-      hOffset = circularHolder.getBoundingClientRect()
-    })
+    // const fakeNeedleDraggabilly = new Draggabilly(fakeNeedle, {
+    //   containment: true
+    // })
+    // fakeNeedleDraggabilly.on('pointerDown', () => {
+    //   // console.info ( 'pointerDown' , e );
+    //   hOffset = circularHolder.getBoundingClientRect()
+    // })
     /**
      * netTrek
      * fixes for iOS - drag
      */
-    fakeNeedleDraggabilly.on('pointerMove', (e) => {
-      let clientX = e.clientX
-      let clientY = e.clientY
+    // fakeNeedleDraggabilly.on('pointerMove', (e) => {
+    //   let clientX = e.clientX
+    //   let clientY = e.clientY
 
-      if (clientX === undefined) {
-        if (e.pageX === undefined) {
-          if (e.touches && e.touches.length > 0) {
-            clientX = e.touches[0].clientX
-            clientY = e.touches[0].clientY
-          } else {
-            throw new Error('coult not detect pageX, pageY')
-          }
-        } else {
-          clientX = e.pageX - document.body.scrollLeft - document.documentElement.scrollLeft
-          clientY = e.pageY - document.body.scrollTop - document.documentElement.scrollTop
-        }
-      }
-      // console.info ( 'Drag clientX' , clientX, clientY, e );
+    //   if (clientX === undefined) {
+    //     if (e.pageX === undefined) {
+    //       if (e.touches && e.touches.length > 0) {
+    //         clientX = e.touches[0].clientX
+    //         clientY = e.touches[0].clientY
+    //       } else {
+    //         throw new Error('coult not detect pageX, pageY')
+    //       }
+    //     } else {
+    //       clientX = e.pageX - document.body.scrollLeft - document.documentElement.scrollLeft
+    //       clientY = e.pageY - document.body.scrollTop - document.documentElement.scrollTop
+    //     }
+    //   }
+    //   // console.info ( 'Drag clientX' , clientX, clientY, e );
 
-      const xPos = clientX - hOffset.left - (hOffset.width / 2)
-      const yPos = clientY - hOffset.top - (hOffset.height / 2)
+    //   const xPos = clientX - hOffset.left - (hOffset.width / 2)
+    //   const yPos = clientY - hOffset.top - (hOffset.height / 2)
 
-      let slope = Math.atan2(-yPos, xPos)
-      needle.className = ''
-      if (slope < 0) {
-        slope += 2 * Math.PI
-      }
-      slope *= 180 / Math.PI
-      slope = 360 - slope
-      if (slope > 270) {
-        slope -= 360
-      }
-      divides = parseInt(slope / 6)
-      const same = Math.abs((6 * divides) - slope)
-      const upper = Math.abs((6 * (divides + 1)) - slope)
-      if (upper < same) {
-        divides++
-      }
-      divides += 15
-      needle.classList.add(selection)
-      needle.classList.add(quick)
-      needle.classList.add(rotate + (divides * 2))
-    })
+    //   let slope = Math.atan2(-yPos, xPos)
+    //   needle.className = ''
+    //   if (slope < 0) {
+    //     slope += 2 * Math.PI
+    //   }
+    //   slope *= 180 / Math.PI
+    //   slope = 360 - slope
+    //   if (slope > 270) {
+    //     slope -= 360
+    //   }
+    //   divides = parseInt(slope / 6)
+    //   const same = Math.abs((6 * divides) - slope)
+    //   const upper = Math.abs((6 * (divides + 1)) - slope)
+    //   if (upper < same) {
+    //     divides++
+    //   }
+    //   divides += 15
+    //   needle.classList.add(selection)
+    //   needle.classList.add(quick)
+    //   needle.classList.add(rotate + (divides * 2))
+    // })
     /**
      * netTrek
      * fixes for iOS - drag
      */
-    const onDragEnd = function () {
-      const minuteViewChildren = me._sDialog.minuteView.getElementsByTagName('div')
-      const sMinute = 'mddtp-minute__selected'
-      const selectedMinute = document.getElementById(sMinute)
-      const cOffset = circle.getBoundingClientRect()
-      fakeNeedle.setAttribute('style', `left:${cOffset.left - hOffset.left}px;top:${cOffset.top - hOffset.top}px`)
-      needle.classList.remove(quick)
-      let select = divides
-      if (select === 1) {
-        select = 60
-      }
-      select = me._nearestDivisor(select, 5)
-      // normalize 60 => 0
-      if (divides === 60) {
-        divides = 0
-      }
-      // remove previously selected value
-      if (selectedMinute) {
-        selectedMinute.id = ''
-        selectedMinute.classList.remove(selected)
-      }
-      // add the new selected
-      if (select > 0) {
-        select /= 5
-        select--
-        minuteViewChildren[select].id = sMinute
-        minuteViewChildren[select].classList.add(selected)
-      }
-      minute.textContent = me._numWithZero(divides)
-      me._sDialog.sDate.minutes(divides)
-    }
+    // const onDragEnd = function () {
+    //   const minuteViewChildren = me._sDialog.minuteView.getElementsByTagName('div')
+    //   const sMinute = 'mddtp-minute__selected'
+    //   const selectedMinute = document.getElementById(sMinute)
+    //   const cOffset = circle.getBoundingClientRect()
+    //   fakeNeedle.setAttribute('style', `left:${cOffset.left - hOffset.left}px;top:${cOffset.top - hOffset.top}px`)
+    //   needle.classList.remove(quick)
+    //   let select = divides
+    //   if (select === 1) {
+    //     select = 60
+    //   }
+    //   select = me._nearestDivisor(select, 5)
+    //   // normalize 60 => 0
+    //   if (divides === 60) {
+    //     divides = 0
+    //   }
+    //   // remove previously selected value
+    //   if (selectedMinute) {
+    //     selectedMinute.id = ''
+    //     selectedMinute.classList.remove(selected)
+    //   }
+    //   // add the new selected
+    //   if (select > 0) {
+    //     select /= 5
+    //     select--
+    //     minuteViewChildren[select].id = sMinute
+    //     minuteViewChildren[select].classList.add(selected)
+    //   }
+    //   minute.textContent = me._numWithZero(divides)
+    //   me._sDialog.sDate.minutes(divides)
+    // }
 
-    fakeNeedleDraggabilly.on('pointerUp', onDragEnd)
-    fakeNeedleDraggabilly.on('dragEnd', onDragEnd)
+    // fakeNeedleDraggabilly.on('pointerUp', onDragEnd)
+    // fakeNeedleDraggabilly.on('dragEnd', onDragEnd)
   }
 
   /**
@@ -1310,11 +1319,36 @@ class mdDateTimePicker {
   */
   _attachEventHandlers () {
     const me = this
+    const now = this._sDialog.now
     const ok = this._sDialog.ok
     const cancel = this._sDialog.cancel
-    // create cutom events to dispatch
     const onCancel = new CustomEvent('onCancel')
     const onOk = new CustomEvent('onOk')
+    now.onclick = function (e) {
+      me._cellClicked({target: me.todaycell}, moment())
+      now.blur()
+      // move into view
+      var diff
+      var sameMonth
+      function gotoCorrectMonth() {
+        diff = me._sDialog.tDate.diff(me._sDialog.sDate, 'days')
+        sameMonth = me._sDialog.tDate.isSame(me._sDialog.sDate, 'month')
+
+        if (!sameMonth) {
+          // which direction we should go
+          if (diff > 0) {
+            me._sDialog.left.click()
+          }
+          else {
+            me._sDialog.right.click()
+          }
+
+          setTimeout(gotoCorrectMonth, 500);
+        }
+      }
+
+      setTimeout(gotoCorrectMonth, 0)
+    }
     cancel.onclick = function () {
       me.toggle()
       if (me._trigger) {
@@ -1335,6 +1369,7 @@ class mdDateTimePicker {
   * @method _setButtonText
   */
   _setButtonText () {
+    this._sDialog.now.textContent = this._now
     this._sDialog.cancel.textContent = this._cancel
     this._sDialog.ok.textContent = this._ok
   }

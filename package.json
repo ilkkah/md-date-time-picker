@@ -19,8 +19,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "gulp": "gulp",
     "cs": "npm run cs:js && npm run cs:scss",
-    "cs:js" : "eslint -c .eslintrc --fix src",
-    "cs:scss" : "scss-lint"
+    "cs:js": "eslint -c .eslintrc --fix src",
+    "cs:scss": "scss-lint"
   },
   "contributors": [
     "Seth Westphal (https://github.com/westy92)",
@@ -54,6 +54,7 @@
     "gulp-babel": "^6.1.2",
     "gulp-cache": "^0.4.6",
     "gulp-concat": "^2.6.1",
+    "gulp-debug": "^3.1.0",
     "gulp-imagemin": "^3.1.1",
     "gulp-minify-css": "1.2.4",
     "gulp-plumber": "1.1.0",
