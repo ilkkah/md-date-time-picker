@@ -320,7 +320,6 @@ class mdDateTimePicker {
     const action = document.createElement('div')
     const cancel = document.createElement('button')
     const ok = document.createElement('button')
-    const now = document.createElement('button')
     // ... add properties to them
     container.id = `mddtp-picker__${type}`
     container.classList.add('mddtp-picker')
@@ -337,6 +336,7 @@ class mdDateTimePicker {
     container.appendChild(body)
     // add stuff to header and body according to dialog type
     if (this._type === 'date') {
+      const now = document.createElement('button')
       const subtitle = document.createElement('div')
       const title = document.createElement('div')
       const titleDay = document.createElement('div')
@@ -403,6 +403,12 @@ class mdDateTimePicker {
       body.appendChild(left)
       body.appendChild(right)
       body.appendChild(years)
+
+      this._addId(now, 'now')
+      now.classList.add('mddtp-button')
+      now.setAttribute('type', 'button')
+      action.appendChild(now)
+
     } else {
       const title = document.createElement('div')
       const hour = document.createElement('span')
@@ -489,11 +495,7 @@ class mdDateTimePicker {
     this._addId(ok, 'ok')
     ok.classList.add('mddtp-button')
     ok.setAttribute('type', 'button')
-    this._addId(now, 'now')
-    now.classList.add('mddtp-button')
-    now.setAttribute('type', 'button')
     // add actions
-    action.appendChild(now)
     action.appendChild(cancel)
     action.appendChild(ok)
     // add actions to body
@@ -1324,6 +1326,8 @@ class mdDateTimePicker {
     const cancel = this._sDialog.cancel
     const onCancel = new CustomEvent('onCancel')
     const onOk = new CustomEvent('onOk')
+    console.log('now', now);
+    if (now)
     now.onclick = function (e) {
       me._cellClicked({target: me.todaycell}, moment())
       now.blur()
@@ -1369,7 +1373,7 @@ class mdDateTimePicker {
   * @method _setButtonText
   */
   _setButtonText () {
-    this._sDialog.now.textContent = this._now
+    if (this._sDialog.now) this._sDialog.now.textContent = this._now
     this._sDialog.cancel.textContent = this._cancel
     this._sDialog.ok.textContent = this._ok
   }

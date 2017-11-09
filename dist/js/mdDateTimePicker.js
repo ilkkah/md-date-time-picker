@@ -291,8 +291,7 @@
             body = document.createElement('div'),
             action = document.createElement('div'),
             cancel = document.createElement('button'),
-            ok = document.createElement('button'),
-            now = document.createElement('button');
+            ok = document.createElement('button');
         // outer most container of the picker
 
         // header container of the picker
@@ -317,7 +316,8 @@
         container.appendChild(body);
         // add stuff to header and body according to dialog type
         if (this._type === 'date') {
-          var subtitle = document.createElement('div'),
+          var now = document.createElement('button'),
+              subtitle = document.createElement('div'),
               title = document.createElement('div'),
               titleDay = document.createElement('div'),
               titleMonth = document.createElement('div'),
@@ -384,6 +384,11 @@
           body.appendChild(left);
           body.appendChild(right);
           body.appendChild(years);
+
+          this._addId(now, 'now');
+          now.classList.add('mddtp-button');
+          now.setAttribute('type', 'button');
+          action.appendChild(now);
         } else {
           var _title = document.createElement('div'),
               hour = document.createElement('span'),
@@ -471,11 +476,7 @@
         this._addId(ok, 'ok');
         ok.classList.add('mddtp-button');
         ok.setAttribute('type', 'button');
-        this._addId(now, 'now');
-        now.classList.add('mddtp-button');
-        now.setAttribute('type', 'button');
         // add actions
-        action.appendChild(now);
         action.appendChild(cancel);
         action.appendChild(ok);
         // add actions to body
@@ -1288,7 +1289,8 @@
             onCancel = new CustomEvent('onCancel'),
             onOk = new CustomEvent('onOk');
 
-        now.onclick = function (e) {
+        console.log('now', now);
+        if (now) now.onclick = function (e) {
           me._cellClicked({ target: me.todaycell }, (0, _moment2.default)());
           now.blur();
           // move into view
@@ -1329,7 +1331,7 @@
     }, {
       key: '_setButtonText',
       value: function _setButtonText() {
-        this._sDialog.now.textContent = this._now;
+        if (this._sDialog.now) this._sDialog.now.textContent = this._now;
         this._sDialog.cancel.textContent = this._cancel;
         this._sDialog.ok.textContent = this._ok;
       }
