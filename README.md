@@ -1,5 +1,11 @@
 # md-date-time-picker
 
+## Fork
+
+Forked from https://github.com/puranjayjain/md-date-time-picker.
+
+Some changes (now button, clock view).
+
 [![Gitter](https://badges.gitter.im/puranjayjain/md-date-time-picker.svg)](https://gitter.im/puranjayjain/md-date-time-picker?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 [![GitHub version](https://img.shields.io/github/release/puranjayjain/md-date-time-picker.svg)](https://badge.fury.io/gh/puranjayjain%2Fmd-date-time-picker)
