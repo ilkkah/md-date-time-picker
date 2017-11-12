@@ -69,6 +69,9 @@
       font-weight: 300;
       font-size: 24px;
     }
+    .mddtp-picker__am_pm {
+      color: $color-am_pm-text;
+    }
     .mddtp-picker__title,
     .mddtp-picker__subtitle {
       color: $color-secondary-text;

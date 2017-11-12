@@ -442,6 +442,8 @@ class mdDateTimePicker {
       this._addId(subtitle, 'subtitle')
       this._addClass(subtitle, 'subtitle')
       subtitle.setAttribute('style', 'display: none')
+      this._addClass(AM, 'am_pm')
+      this._addClass(PM, 'am_pm')
       this._addId(AM, 'AM')
       // AM.textContent = 'AM'
       // Change to 'AM' to Locale Meridiem

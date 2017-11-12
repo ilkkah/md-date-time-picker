@@ -423,6 +423,8 @@
           this._addId(_subtitle, 'subtitle');
           this._addClass(_subtitle, 'subtitle');
           _subtitle.setAttribute('style', 'display: none');
+          this._addClass(AM, 'am_pm');
+          this._addClass(PM, 'am_pm');
           this._addId(AM, 'AM');
           // AM.textContent = 'AM'
           // Change to 'AM' to Locale Meridiem
