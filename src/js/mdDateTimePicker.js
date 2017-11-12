@@ -209,7 +209,7 @@ class mdDateTimePicker {
     * @type {Array}
     */
     const sDialogEls = [
-      'viewHolder', 'years', 'header', 'now', 'cancel', 'ok', 'left', 'right', 'previous', 'current', 'next', 'subtitle', 'title', 'titleDay', 'titleMonth', 'AM', 'PM', 'needle', 'hourView', 'minuteView', 'hour', 'minute', 'fakeNeedle', 'circularHolder', 'circle', 'dotSpan'
+      'viewHolder', 'years', 'header', 'now', 'cancel', 'ok', 'left', 'right', 'previous', 'current', 'next', 'subtitle', 'title', 'titleDay', 'titleMonth', 'AM', 'PM', 'hneedle', 'mneedle', 'hourView', 'minuteView', 'hour', 'minute', 'fakeNeedle', 'circularHolder', 'circle', 'dotSpan'
     ]
     let i = sDialogEls.length
     while (i--) {
@@ -260,7 +260,8 @@ class mdDateTimePicker {
     const minuteView = this._sDialog.minuteView
     const hourView = this._sDialog.hourView
     const picker = this._sDialog.picker
-    const needle = this._sDialog.needle
+    const hneedle = this._sDialog.hneedle
+    const mneedle = this._sDialog.mneedle
     const dotSpan = this._sDialog.dotSpan
     const active = 'mddtp-picker__color--active'
     const inactive = 'mddtp-picker--inactive'
@@ -288,7 +289,8 @@ class mdDateTimePicker {
       hourView.classList.remove(hidden)
       subtitle.setAttribute('style', 'display: none')
       dotSpan.setAttribute('style', 'display: none')
-      needle.className = selection
+      hneedle.className = selection
+      mneedle.className = selection
     }
     setTimeout(() => {
       // remove portrait mode
@@ -361,8 +363,8 @@ class mdDateTimePicker {
       title.appendChild(titleDay)
       title.appendChild(titleMonth)
       // add them to header
-      header.appendChild(subtitle)
       header.appendChild(title)
+      header.appendChild(subtitle)
       // inside body
       // inside viewHolder
       this._addId(viewHolder, 'viewHolder')
@@ -418,10 +420,12 @@ class mdDateTimePicker {
       const AM = document.createElement('div')
       const PM = document.createElement('div')
       const circularHolder = document.createElement('div')
-      const needle = document.createElement('div')
-      const dot = document.createElement('span')
-      const line = document.createElement('span')
-      const circle = document.createElement('span')
+      const hneedle = document.createElement('div')
+      const mneedle = document.createElement('div')
+      const hline = document.createElement('span')
+      const hcircle = document.createElement('span')
+      const mline = document.createElement('span')
+      const mcircle = document.createElement('span')
       const minuteView = document.createElement('div')
       const fakeNeedle = document.createElement('div')
       const hourView = document.createElement('div')
@@ -458,12 +462,20 @@ class mdDateTimePicker {
       // inside body
       this._addId(circularHolder, 'circularHolder')
       this._addClass(circularHolder, 'circularHolder')
-      this._addId(needle, 'needle')
-      needle.classList.add('mddtp-picker__selection')
-      this._addClass(dot, 'dot')
-      this._addClass(line, 'line')
-      this._addId(circle, 'circle')
-      this._addClass(circle, 'circle')
+      this._addClass(circularHolder, 'circularHolder__hour')
+      this._addId(hneedle, 'hneedle')
+      this._addId(mneedle, 'mneedle')
+      hneedle.classList.add('mddtp-picker__selection')
+      mneedle.classList.add('mddtp-picker__selection')
+
+      this._addClass(hline, 'line')
+      this._addId(hcircle, 'circle')
+      this._addClass(hcircle, 'circle')
+
+      this._addClass(mline, 'line')
+      this._addId(mcircle, 'circle')
+      this._addClass(mcircle, 'circle')
+
       this._addId(minuteView, 'minuteView')
       minuteView.classList.add('mddtp-picker__circularView')
       minuteView.classList.add('mddtp-picker__circularView--hidden')
@@ -471,12 +483,18 @@ class mdDateTimePicker {
       fakeNeedle.classList.add('mddtp-picker__circle--fake')
       this._addId(hourView, 'hourView')
       hourView.classList.add('mddtp-picker__circularView')
-      // add them to needle
-      needle.appendChild(dot)
-      needle.appendChild(line)
-      needle.appendChild(circle)
+
+      // add them to hneedle
+      hneedle.appendChild(hline)
+      hneedle.appendChild(hcircle)
+
+      // add them to mneedle
+      mneedle.appendChild(mline)
+      mneedle.appendChild(mcircle)
+
       // add them to circularHolder
-      circularHolder.appendChild(needle)
+      circularHolder.appendChild(hneedle)
+      circularHolder.appendChild(mneedle)
       circularHolder.appendChild(minuteView)
       circularHolder.appendChild(fakeNeedle)
       circularHolder.appendChild(hourView)
@@ -505,16 +523,45 @@ class mdDateTimePicker {
     document.getElementsByTagName('body').item(0).appendChild(docfrag)
   }
 
+  _setHourActive () {
+    this._sDialog.hneedle.classList.add('mddtp-picker__active')
+    console.log('_setHourActive', this._sDialog.hneedle)
+    console.log(this._sDialog.hneedle.classList)
+  }
+
+  _toggleHourMinute () {
+    console.log('_toggleHourMinute (1)')
+    console.log(this._sDialog.hneedle)
+    console.log(this._sDialog.mneedle)
+    console.log(this._sDialog.hneedle.classList)
+    console.log(this._sDialog.mneedle.classList)
+    console.log(this._sDialog.hneedle.classList.contains('mddtp-picker__active'))
+    this._sDialog.hneedle.classList.toggle('mddtp-picker__active')
+    this._sDialog.mneedle.classList.toggle('mddtp-picker__active')
+    console.log('_toggleHourMinute (2)')
+    console.log(this._sDialog.hneedle)
+    console.log(this._sDialog.mneedle)
+    console.log(this._sDialog.hneedle.classList)
+    console.log(this._sDialog.mneedle.classList)
+    console.log(this._sDialog.hneedle.classList.contains('mddtp-picker__active'))
+  }
+
   /**
   * [_initTimeDialog to initiate the date picker dialog usage e.g initDateDialog(moment())]
   * @param  {moment} m [date for today or current]
   */
   _initTimeDialog (m) {
+    console.log('_initTimeDialog')
     const hour = this._sDialog.hour
     const minute = this._sDialog.minute
     const subtitle = this._sDialog.subtitle
     const dotSpan = this._sDialog.dotSpan
+
+    this._setHourActive()
+
     // switch according to 12 hour or 24 hour mode
+    // this._mode = true: hour
+    // this._mode = fals: minute
     if (this._mode) {
       // CHANGED exception case for 24 => 0 issue #57
       let text = parseInt(m.format('H'), 10)
@@ -543,7 +590,7 @@ class mdDateTimePicker {
     this._initMinute()
     this._attachEventHandlers()
     this._changeM()
-    this._dragDial()
+    // this._dragDial()
     this._switchToView(hour)
     this._switchToView(minute)
     this._addClockEvent()
@@ -552,7 +599,7 @@ class mdDateTimePicker {
 
   _initHour () {
     const hourView = this._sDialog.hourView
-    const needle = this._sDialog.needle
+    const hneedle = this._sDialog.hneedle
     const hour = 'mddtp-hour__selected'
     const selected = 'mddtp-picker__cell--selected'
     const rotate = 'mddtp-picker__cell--rotate-'
@@ -560,6 +607,7 @@ class mdDateTimePicker {
     const cell = 'mddtp-picker__cell'
     const docfrag = document.createDocumentFragment()
     let hourNow
+    console.log('_initHour this._mode', this._mode);
     if (this._mode) {
       const degreeStep = (this._inner24 === true) ? 10 : 5
       hourNow = parseInt(this._sDialog.tDate.format('H'), 10)
@@ -584,13 +632,13 @@ class mdDateTimePicker {
         if (hourNow === i) {
           div.id = hour
           div.classList.add(selected)
-          needle.classList.add(rotate + position)
+          hneedle.classList.add(rotate + position)
         }
         // CHANGED exception case for 24 => 0 issue #58
         if (i === 24 && hourNow === 0) {
           div.id = hour
           div.classList.add(selected)
-          needle.classList.add(rotate + position)
+          hneedle.classList.add(rotate + position)
         }
         div.appendChild(span)
         docfrag.appendChild(div)
@@ -606,7 +654,7 @@ class mdDateTimePicker {
         if (hourNow === i) {
           div.id = hour
           div.classList.add(selected)
-          needle.classList.add(rotate + j)
+          hneedle.classList.add(rotate + j)
         }
         div.appendChild(span)
         docfrag.appendChild(div)
@@ -621,8 +669,10 @@ class mdDateTimePicker {
   }
 
   _initMinute () {
+    console.log('_initMinute');
     const minuteView = this._sDialog.minuteView
     let minuteNow = parseInt(this._sDialog.tDate.format('m'), 10)
+    const mneedle = this._sDialog.mneedle
     const sMinute = 'mddtp-minute__selected'
     const selected = 'mddtp-picker__cell--selected'
     const rotate = 'mddtp-picker__cell--rotate-'
@@ -653,6 +703,22 @@ class mdDateTimePicker {
     while (minuteView.lastChild) {
       minuteView.removeChild(minuteView.lastChild)
     }
+
+
+    var spoke, value;
+
+    spoke = 60
+    value = parseInt(this._sDialog.tDate.format('m'), 10)
+    const rotationClass = this._calcRotation(spoke, parseInt(value, 10))
+    console.log('spoke', spoke)
+    console.log('value', value)
+    console.log('rotationClass', rotationClass)
+    if (rotationClass) {
+      mneedle.classList.add(rotationClass)
+    }
+
+
+
     // set inner html accordingly
     minuteView.appendChild(docfrag)
   }
@@ -667,7 +733,7 @@ class mdDateTimePicker {
     const titleDay = this._sDialog.titleDay
     const titleMonth = this._sDialog.titleMonth
     this._fillText(subtitle, m.format('YYYY'))
-    this._fillText(titleDay, m.format('ddd, '))
+    this._fillText(titleDay, m.format('ddd'))
     this._fillText(titleMonth, m.format('MMM D'))
     this._initYear()
     this._initViewHolder()
@@ -795,6 +861,14 @@ class mdDateTimePicker {
     this._changeYear(years)
   }
 
+  _removeRotation(needle) {
+    needle.classList.forEach((el) => {
+      if (/rotate/.test(el)) {
+        needle.classList.remove(el)
+      }
+    })
+  }
+
   /**
    * Points the needle to the correct hour or minute
    */
@@ -804,11 +878,13 @@ class mdDateTimePicker {
     const circle = this._sDialog.circle
     const fakeNeedle = this._sDialog.fakeNeedle
     const circularHolder = this._sDialog.circularHolder
-    const selection = 'mddtp-picker__selection'
-    const needle = me._sDialog.needle
+    const needle = mdDateTimePicker.dialog.view ? me._sDialog.hneedle: me._sDialog.mneedle
     // move the needle to correct position
-    needle.className = ''
-    needle.classList.add(selection)
+    me._removeRotation(needle)
+    console.log('_pointNeedle, mdDateTimePicker.dialog.view', mdDateTimePicker.dialog.view)
+    console.log('_pointNeedle, me._mode', me._mode)
+    // mdDateTimePicker.dialog.view = false: minute mode
+    // mdDateTimePicker.dialog.view = true: hour mode
     if (!mdDateTimePicker.dialog.view) {
       value = me._sDialog.sDate.format('m')
 
@@ -833,6 +909,8 @@ class mdDateTimePicker {
       value = me._sDialog.sDate.format('h')
     }
     const rotationClass = me._calcRotation(spoke, parseInt(value, 10))
+    console.log('spoke', spoke)
+    console.log('rotationClass', rotationClass)
     if (rotationClass) {
       needle.classList.add(rotationClass)
     }
@@ -850,6 +928,7 @@ class mdDateTimePicker {
   */
   _switchToView (el) {
     const me = this
+    console.log('_switchToView... ', el, this._type, this._inner24, me._mode)
     // attach the view change button
     if (this._type === 'date') {
       el.onclick = function () {
@@ -858,9 +937,11 @@ class mdDateTimePicker {
     } else {
       if (this._inner24 === true && me._mode) {
         if (parseInt(me._sDialog.sDate.format('H'), 10) > 12) {
-          me._sDialog.needle.classList.add('mddtp-picker__cell--rotate24')
+          me._sDialog.hneedle.classList.add('mddtp-picker__cell--rotate24')
+          me._sDialog.mneedle.classList.add('mddtp-picker__cell--rotate24')
         } else {
-          me._sDialog.needle.classList.remove('mddtp-picker__cell--rotate24')
+          me._sDialog.hneedle.classList.remove('mddtp-picker__cell--rotate24')
+          me._sDialog.mneedle.classList.remove('mddtp-picker__cell--rotate24')
         }
       }
 
@@ -893,6 +974,8 @@ class mdDateTimePicker {
     // move the needle to correct position
     // toggle the view type
     mdDateTimePicker.dialog.view = !mdDateTimePicker.dialog.view
+    console.log('_switchToTimeView, mdDateTimePicker.dialog.view', mdDateTimePicker.dialog.view)
+    me._toggleHourMinute()
     me._pointNeedle(me)
   }
   /**
@@ -911,6 +994,8 @@ class mdDateTimePicker {
     const title = me._sDialog.title
     const subtitle = me._sDialog.subtitle
     const currentYear = document.getElementById('mddtp-date__currentYear')
+    // mdDateTimePicker.dialog.view = true: years mode
+    // mdDateTimePicker.dialog.view = false: normal calendar mode
     if (mdDateTimePicker.dialog.view) {
       viewHolder.classList.add('zoomOut')
       years.classList.remove('mddtp-picker__years--invisible')
@@ -930,6 +1015,7 @@ class mdDateTimePicker {
     title.classList.toggle('mddtp-picker__color--active')
     subtitle.classList.toggle('mddtp-picker__color--active')
     mdDateTimePicker.dialog.view = !mdDateTimePicker.dialog.view
+    console.log('_switchToDateView, mdDateTimePicker.dialog.view', mdDateTimePicker.dialog.view)
     setTimeout(() => {
       el.removeAttribute('disabled')
     }, 300)
@@ -941,6 +1027,7 @@ class mdDateTimePicker {
     const minuteView = this._sDialog.minuteView
     const sClass = 'mddtp-picker__cell--selected'
     hourView.onclick = function (e) {
+      console.log('hourView.onclick')
       const sHour = 'mddtp-hour__selected'
       const selectedHour = document.getElementById(sHour)
       let setHour = 0
@@ -970,6 +1057,7 @@ class mdDateTimePicker {
       }
     }
     minuteView.onclick = function (e) {
+      console.log('minuteView.onclick')
       const sMinute = 'mddtp-minute__selected'
       const selectedMinute = document.getElementById(sMinute)
       let setMinute = 0
@@ -1017,7 +1105,7 @@ class mdDateTimePicker {
         this._sDialog.sDate = currentDate.clone()
 
         this._fillText(subtitle, currentDate.year())
-        this._fillText(titleDay, currentDate.format('ddd, '))
+        this._fillText(titleDay, currentDate.format('ddd'))
         this._fillText(titleMonth, currentDate.format('MMM D'))
 
         if (this._autoClose === true) {

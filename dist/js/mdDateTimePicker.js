@@ -198,7 +198,7 @@
         *
         * @type {Array}
         */
-        var sDialogEls = ['viewHolder', 'years', 'header', 'now', 'cancel', 'ok', 'left', 'right', 'previous', 'current', 'next', 'subtitle', 'title', 'titleDay', 'titleMonth', 'AM', 'PM', 'needle', 'hourView', 'minuteView', 'hour', 'minute', 'fakeNeedle', 'circularHolder', 'circle', 'dotSpan'],
+        var sDialogEls = ['viewHolder', 'years', 'header', 'now', 'cancel', 'ok', 'left', 'right', 'previous', 'current', 'next', 'subtitle', 'title', 'titleDay', 'titleMonth', 'AM', 'PM', 'hneedle', 'mneedle', 'hourView', 'minuteView', 'hour', 'minute', 'fakeNeedle', 'circularHolder', 'circle', 'dotSpan'],
             i = sDialogEls.length;
 
         while (i--) {
@@ -240,7 +240,8 @@
             minuteView = this._sDialog.minuteView,
             hourView = this._sDialog.hourView,
             picker = this._sDialog.picker,
-            needle = this._sDialog.needle,
+            hneedle = this._sDialog.hneedle,
+            mneedle = this._sDialog.mneedle,
             dotSpan = this._sDialog.dotSpan,
             active = 'mddtp-picker__color--active',
             inactive = 'mddtp-picker--inactive',
@@ -269,7 +270,8 @@
           hourView.classList.remove(hidden);
           subtitle.setAttribute('style', 'display: none');
           dotSpan.setAttribute('style', 'display: none');
-          needle.className = selection;
+          hneedle.className = selection;
+          mneedle.className = selection;
         }
         setTimeout(function () {
           // remove portrait mode
@@ -342,8 +344,8 @@
           title.appendChild(titleDay);
           title.appendChild(titleMonth);
           // add them to header
-          header.appendChild(subtitle);
           header.appendChild(title);
+          header.appendChild(subtitle);
           // inside body
           // inside viewHolder
           this._addId(viewHolder, 'viewHolder');
@@ -398,10 +400,12 @@
               AM = document.createElement('div'),
               PM = document.createElement('div'),
               circularHolder = document.createElement('div'),
-              needle = document.createElement('div'),
-              dot = document.createElement('span'),
-              line = document.createElement('span'),
-              circle = document.createElement('span'),
+              hneedle = document.createElement('div'),
+              mneedle = document.createElement('div'),
+              hline = document.createElement('span'),
+              hcircle = document.createElement('span'),
+              mline = document.createElement('span'),
+              mcircle = document.createElement('span'),
               minuteView = document.createElement('div'),
               fakeNeedle = document.createElement('div'),
               hourView = document.createElement('div');
@@ -439,12 +443,20 @@
           // inside body
           this._addId(circularHolder, 'circularHolder');
           this._addClass(circularHolder, 'circularHolder');
-          this._addId(needle, 'needle');
-          needle.classList.add('mddtp-picker__selection');
-          this._addClass(dot, 'dot');
-          this._addClass(line, 'line');
-          this._addId(circle, 'circle');
-          this._addClass(circle, 'circle');
+          this._addClass(circularHolder, 'circularHolder__hour');
+          this._addId(hneedle, 'hneedle');
+          this._addId(mneedle, 'mneedle');
+          hneedle.classList.add('mddtp-picker__selection');
+          mneedle.classList.add('mddtp-picker__selection');
+
+          this._addClass(hline, 'line');
+          this._addId(hcircle, 'circle');
+          this._addClass(hcircle, 'circle');
+
+          this._addClass(mline, 'line');
+          this._addId(mcircle, 'circle');
+          this._addClass(mcircle, 'circle');
+
           this._addId(minuteView, 'minuteView');
           minuteView.classList.add('mddtp-picker__circularView');
           minuteView.classList.add('mddtp-picker__circularView--hidden');
@@ -452,12 +464,18 @@
           fakeNeedle.classList.add('mddtp-picker__circle--fake');
           this._addId(hourView, 'hourView');
           hourView.classList.add('mddtp-picker__circularView');
-          // add them to needle
-          needle.appendChild(dot);
-          needle.appendChild(line);
-          needle.appendChild(circle);
+
+          // add them to hneedle
+          hneedle.appendChild(hline);
+          hneedle.appendChild(hcircle);
+
+          // add them to mneedle
+          mneedle.appendChild(mline);
+          mneedle.appendChild(mcircle);
+
           // add them to circularHolder
-          circularHolder.appendChild(needle);
+          circularHolder.appendChild(hneedle);
+          circularHolder.appendChild(mneedle);
           circularHolder.appendChild(minuteView);
           circularHolder.appendChild(fakeNeedle);
           circularHolder.appendChild(hourView);
@@ -486,14 +504,45 @@
         document.getElementsByTagName('body').item(0).appendChild(docfrag);
       }
     }, {
+      key: '_setHourActive',
+      value: function _setHourActive() {
+        this._sDialog.hneedle.classList.add('mddtp-picker__active');
+        console.log('_setHourActive', this._sDialog.hneedle);
+        console.log(this._sDialog.hneedle.classList);
+      }
+    }, {
+      key: '_toggleHourMinute',
+      value: function _toggleHourMinute() {
+        console.log('_toggleHourMinute (1)');
+        console.log(this._sDialog.hneedle);
+        console.log(this._sDialog.mneedle);
+        console.log(this._sDialog.hneedle.classList);
+        console.log(this._sDialog.mneedle.classList);
+        console.log(this._sDialog.hneedle.classList.contains('mddtp-picker__active'));
+        this._sDialog.hneedle.classList.toggle('mddtp-picker__active');
+        this._sDialog.mneedle.classList.toggle('mddtp-picker__active');
+        console.log('_toggleHourMinute (2)');
+        console.log(this._sDialog.hneedle);
+        console.log(this._sDialog.mneedle);
+        console.log(this._sDialog.hneedle.classList);
+        console.log(this._sDialog.mneedle.classList);
+        console.log(this._sDialog.hneedle.classList.contains('mddtp-picker__active'));
+      }
+    }, {
       key: '_initTimeDialog',
       value: function _initTimeDialog(m) {
+        console.log('_initTimeDialog');
         var hour = this._sDialog.hour,
             minute = this._sDialog.minute,
             subtitle = this._sDialog.subtitle,
             dotSpan = this._sDialog.dotSpan;
 
+
+        this._setHourActive();
+
         // switch according to 12 hour or 24 hour mode
+        // this._mode = true: hour
+        // this._mode = fals: minute
         if (this._mode) {
           // CHANGED exception case for 24 => 0 issue #57
           var text = parseInt(m.format('H'), 10);
@@ -522,7 +571,7 @@
         this._initMinute();
         this._attachEventHandlers();
         this._changeM();
-        this._dragDial();
+        // this._dragDial()
         this._switchToView(hour);
         this._switchToView(minute);
         this._addClockEvent();
@@ -532,7 +581,7 @@
       key: '_initHour',
       value: function _initHour() {
         var hourView = this._sDialog.hourView,
-            needle = this._sDialog.needle,
+            hneedle = this._sDialog.hneedle,
             hour = 'mddtp-hour__selected',
             selected = 'mddtp-picker__cell--selected',
             rotate = 'mddtp-picker__cell--rotate-',
@@ -541,6 +590,7 @@
             docfrag = document.createDocumentFragment(),
             hourNow = void 0;
 
+        console.log('_initHour this._mode', this._mode);
         if (this._mode) {
           var degreeStep = this._inner24 === !0 ? 10 : 5;
           hourNow = parseInt(this._sDialog.tDate.format('H'), 10);
@@ -566,13 +616,13 @@
             if (hourNow === i) {
               div.id = hour;
               div.classList.add(selected);
-              needle.classList.add(rotate + position);
+              hneedle.classList.add(rotate + position);
             }
             // CHANGED exception case for 24 => 0 issue #58
             if (i === 24 && hourNow === 0) {
               div.id = hour;
               div.classList.add(selected);
-              needle.classList.add(rotate + position);
+              hneedle.classList.add(rotate + position);
             }
             div.appendChild(span);
             docfrag.appendChild(div);
@@ -589,7 +639,7 @@
             if (hourNow === _i) {
               _div.id = hour;
               _div.classList.add(selected);
-              needle.classList.add(rotate + _j);
+              hneedle.classList.add(rotate + _j);
             }
             _div.appendChild(_span);
             docfrag.appendChild(_div);
@@ -605,8 +655,10 @@
     }, {
       key: '_initMinute',
       value: function _initMinute() {
+        console.log('_initMinute');
         var minuteView = this._sDialog.minuteView,
             minuteNow = parseInt(this._sDialog.tDate.format('m'), 10),
+            mneedle = this._sDialog.mneedle,
             sMinute = 'mddtp-minute__selected',
             selected = 'mddtp-picker__cell--selected',
             rotate = 'mddtp-picker__cell--rotate-',
@@ -639,6 +691,19 @@
         while (minuteView.lastChild) {
           minuteView.removeChild(minuteView.lastChild);
         }
+
+        var spoke, value;
+
+        spoke = 60;
+        value = parseInt(this._sDialog.tDate.format('m'), 10);
+        var rotationClass = this._calcRotation(spoke, parseInt(value, 10));
+        console.log('spoke', spoke);
+        console.log('value', value);
+        console.log('rotationClass', rotationClass);
+        if (rotationClass) {
+          mneedle.classList.add(rotationClass);
+        }
+
         // set inner html accordingly
         minuteView.appendChild(docfrag);
       }
@@ -651,7 +716,7 @@
             titleMonth = this._sDialog.titleMonth;
 
         this._fillText(subtitle, m.format('YYYY'));
-        this._fillText(titleDay, m.format('ddd, '));
+        this._fillText(titleDay, m.format('ddd'));
         this._fillText(titleMonth, m.format('MMM D'));
         this._initYear();
         this._initViewHolder();
@@ -781,6 +846,15 @@
         this._changeYear(years);
       }
     }, {
+      key: '_removeRotation',
+      value: function _removeRotation(needle) {
+        needle.classList.forEach(function (el) {
+          if (/rotate/.test(el)) {
+            needle.classList.remove(el);
+          }
+        });
+      }
+    }, {
       key: '_pointNeedle',
       value: function _pointNeedle(me) {
         var spoke = 60,
@@ -788,12 +862,14 @@
             circle = this._sDialog.circle,
             fakeNeedle = this._sDialog.fakeNeedle,
             circularHolder = this._sDialog.circularHolder,
-            selection = 'mddtp-picker__selection',
-            needle = me._sDialog.needle;
+            needle = mdDateTimePicker.dialog.view ? me._sDialog.hneedle : me._sDialog.mneedle;
 
         // move the needle to correct position
-        needle.className = '';
-        needle.classList.add(selection);
+        me._removeRotation(needle);
+        console.log('_pointNeedle, mdDateTimePicker.dialog.view', mdDateTimePicker.dialog.view);
+        console.log('_pointNeedle, me._mode', me._mode);
+        // mdDateTimePicker.dialog.view = false: minute mode
+        // mdDateTimePicker.dialog.view = true: hour mode
         if (!mdDateTimePicker.dialog.view) {
           value = me._sDialog.sDate.format('m');
 
@@ -819,6 +895,8 @@
           value = me._sDialog.sDate.format('h');
         }
         var rotationClass = me._calcRotation(spoke, parseInt(value, 10));
+        console.log('spoke', spoke);
+        console.log('rotationClass', rotationClass);
         if (rotationClass) {
           needle.classList.add(rotationClass);
         }
@@ -827,6 +905,7 @@
       key: '_switchToView',
       value: function _switchToView(el) {
         var me = this;
+        console.log('_switchToView... ', el, this._type, this._inner24, me._mode);
         // attach the view change button
         if (this._type === 'date') {
           el.onclick = function () {
@@ -835,9 +914,11 @@
         } else {
           if (this._inner24 === !0 && me._mode) {
             if (parseInt(me._sDialog.sDate.format('H'), 10) > 12) {
-              me._sDialog.needle.classList.add('mddtp-picker__cell--rotate24');
+              me._sDialog.hneedle.classList.add('mddtp-picker__cell--rotate24');
+              me._sDialog.mneedle.classList.add('mddtp-picker__cell--rotate24');
             } else {
-              me._sDialog.needle.classList.remove('mddtp-picker__cell--rotate24');
+              me._sDialog.hneedle.classList.remove('mddtp-picker__cell--rotate24');
+              me._sDialog.mneedle.classList.remove('mddtp-picker__cell--rotate24');
             }
           }
 
@@ -864,6 +945,8 @@
         // move the needle to correct position
         // toggle the view type
         mdDateTimePicker.dialog.view = !mdDateTimePicker.dialog.view;
+        console.log('_switchToTimeView, mdDateTimePicker.dialog.view', mdDateTimePicker.dialog.view);
+        me._toggleHourMinute();
         me._pointNeedle(me);
       }
     }, {
@@ -876,6 +959,8 @@
             subtitle = me._sDialog.subtitle,
             currentYear = document.getElementById('mddtp-date__currentYear');
 
+        // mdDateTimePicker.dialog.view = true: years mode
+        // mdDateTimePicker.dialog.view = false: normal calendar mode
         if (mdDateTimePicker.dialog.view) {
           viewHolder.classList.add('zoomOut');
           years.classList.remove('mddtp-picker__years--invisible');
@@ -895,6 +980,7 @@
         title.classList.toggle('mddtp-picker__color--active');
         subtitle.classList.toggle('mddtp-picker__color--active');
         mdDateTimePicker.dialog.view = !mdDateTimePicker.dialog.view;
+        console.log('_switchToDateView, mdDateTimePicker.dialog.view', mdDateTimePicker.dialog.view);
         setTimeout(function () {
           el.removeAttribute('disabled');
         }, 300);
@@ -908,6 +994,7 @@
             sClass = 'mddtp-picker__cell--selected';
 
         hourView.onclick = function (e) {
+          console.log('hourView.onclick');
           var sHour = 'mddtp-hour__selected',
               selectedHour = document.getElementById(sHour),
               setHour = 0;
@@ -938,6 +1025,7 @@
           }
         };
         minuteView.onclick = function (e) {
+          console.log('minuteView.onclick');
           var sMinute = 'mddtp-minute__selected',
               selectedMinute = document.getElementById(sMinute),
               setMinute = 0;
@@ -988,7 +1076,7 @@
           this._sDialog.sDate = currentDate.clone();
 
           this._fillText(subtitle, currentDate.year());
-          this._fillText(titleDay, currentDate.format('ddd, '));
+          this._fillText(titleDay, currentDate.format('ddd'));
           this._fillText(titleMonth, currentDate.format('MMM D'));
 
           if (this._autoClose === !0) {

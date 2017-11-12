@@ -18,7 +18,7 @@
 // specific to date dialog
 &.mddtp-picker-date {
   .mddtp-picker__title div {
-    display: inline-block;
+    display: block;
     // NOTE these use id
     &#mddtp-date__titleMonth {
       margin-left: 8px;
@@ -29,7 +29,6 @@
 // specific to time dialog
 &.mddtp-picker-time {
   .mddtp-picker__header {
-    text-align: right;
     width: calc(100% - 48px);
     .mddtp-picker__title {
       display: inline-block;

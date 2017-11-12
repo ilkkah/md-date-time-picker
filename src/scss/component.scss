@@ -54,6 +54,8 @@
   overflow: hidden;
   z-index: 99999;
   .mddtp-picker__header {
+    text-align: center;
+    box-sizing: border-box;
     width: 100px;
     background-color: $picker-header-color;
     padding: 24px 24px 20px;
@@ -61,18 +63,20 @@
       color: $color-secondary-text;
       font-family: $regular;
       font-size: 28px;
-      font-weight: 700;
+      font-weight: 400;
     }
     .mddtp-picker__subtitle {
-      font-weight: 400;
-      font-size: 16px; //TODO 17px on mobile
-      line-height: 20px;
+      font-weight: 300;
+      font-size: 24px;
     }
     .mddtp-picker__title,
     .mddtp-picker__subtitle {
       color: $color-secondary-text;
       margin: 0;
       cursor: pointer;
+    }
+    #mddtp-date__titleDay {
+      font-weight: 300;
     }
     .mddtp-picker__color--active {
       color: $color-primary-text;
@@ -316,15 +320,26 @@
   border-radius: 50%;
   height: 36px;
   width: 36px;
-  cursor: move; /* fallback if grab cursor is unsupported */
-  cursor: grab;
-  cursor: -moz-grab;
-  cursor: -webkit-grab;
+  cursor: move; 
+}
 
-  &.is-pointer-down,&:active {
-    cursor: grabbing;
-    cursor: -moz-grabbing;
-    cursor: -webkit-grabbing;
+#mddtp-time__hneedle.mddtp-picker__selection {
+  width: calc(50% + 5px);
+
+  .mddtp-picker__line {
+    margin-right: 26px;
+  }
+}
+
+#mddtp-time__mneedle.mddtp-picker__selection {
+  span.mddtp-picker__line {
+    height: 1px;
+  }
+}
+
+.mddtp-picker__selection.mddtp-picker__active {
+  .mddtp-picker__circle {
+    background-color: $picker-line-color;
   }
 }
 
@@ -332,25 +347,30 @@
   position: absolute;
   left: calc(50% - 4px);
   top: calc(50% - 18px);
-  width: calc(50% + 4px);
+  width: calc(50% + 21px);
   font-size: 0;
   transform-origin: 4px center;
   transition: .3s cubic-bezier(.42, 0, .58, 1);
 
-  span {
-    display: inline-block;
+  .mddtp-picker__line {
     background-color: $picker-line-color;
-    height: 2px;
+  }
+
+  span {
+    display: inline-block;    
+    height: 5px;
     vertical-align: middle;
 
     &.mddtp-picker__dot {
-      width: 8px;
-      height: 8px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
+      background-color: #666;
     }
 
     &.mddtp-picker__line {
-      width: calc(100% - 52px);
+      width: calc(100% - 71px);
+      margin-right: 10px;
     }
 
     &.mddtp-picker__circle {
