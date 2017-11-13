@@ -55,6 +55,7 @@ $picker-images-base-path: "../images/" !default;
 
 //default light theme colors
 $picker-header-color: $palette-primary-500 !default;
+$picker-header-header-color: $palette-primary-700 !default;
 $picker-body-color: #fff !default;
 $picker-button-left: $picker-images-base-path + "ic_keyboard_arrow_left_black_24px.svg" !default;
 $picker-button-right: $picker-images-base-path + "ic_keyboard_arrow_right_black_24px.svg" !default;

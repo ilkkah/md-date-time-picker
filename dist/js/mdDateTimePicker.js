@@ -67,8 +67,6 @@
     * @param  {Boolean} colon = true                                      [add an option to enable quote in 24 hour mode]
     * @param  {Boolean} autoClose = false                                 [close dialog on date/time selection]
     * @param  {Boolean} inner24 = false                                   [if 24-hour mode and (true), the PM hours shows in an inner dial]
-    * @param  {String} prevHandle = <div class="mddtp-prev-handle"></div> [The HTML content of the handle to go to previous month]
-    * @param  {String} nextHandle = <div class="mddtp-next-handle"></div> [The HTML content of the handle to go to next month]
     *
     * @return {Object}                                                    [mdDateTimePicker]
     */
@@ -97,11 +95,7 @@
           _ref$autoClose = _ref.autoClose,
           autoClose = _ref$autoClose === undefined ? !1 : _ref$autoClose,
           _ref$inner = _ref.inner24,
-          inner24 = _ref$inner === undefined ? !1 : _ref$inner,
-          _ref$prevHandle = _ref.prevHandle,
-          prevHandle = _ref$prevHandle === undefined ? '<div class="mddtp-prev-handle"></div>' : _ref$prevHandle,
-          _ref$nextHandle = _ref.nextHandle,
-          nextHandle = _ref$nextHandle === undefined ? '<div class="mddtp-next-handle"></div>' : _ref$nextHandle;
+          inner24 = _ref$inner === undefined ? !1 : _ref$inner;
 
       _classCallCheck(this, mdDateTimePicker);
 
@@ -118,8 +112,6 @@
       this._colon = colon;
       this._autoClose = autoClose;
       this._inner24 = inner24;
-      this._prevHandle = prevHandle;
-      this._nextHandle = nextHandle;
 
       /**
       * [dialog selected classes have the same structure as dialog but one level down]
@@ -198,7 +190,7 @@
         *
         * @type {Array}
         */
-        var sDialogEls = ['viewHolder', 'years', 'header', 'now', 'cancel', 'ok', 'left', 'right', 'previous', 'current', 'next', 'subtitle', 'title', 'titleDay', 'titleMonth', 'AM', 'PM', 'hneedle', 'mneedle', 'hourView', 'minuteView', 'hour', 'minute', 'fakeNeedle', 'circularHolder', 'circle', 'dotSpan'],
+        var sDialogEls = ['viewHolder', 'years', 'header', 'now', 'cancel', 'ok', 'left', 'right', 'previous', 'current', 'next', 'header_header', 'subtitle', 'title', 'titleDay', 'titleMonth', 'AM', 'PM', 'hneedle', 'mneedle', 'hourView', 'minuteView', 'hour', 'minute', 'fakeNeedle', 'circularHolder', 'circle', 'dotSpan'],
             i = sDialogEls.length;
 
         while (i--) {
@@ -290,6 +282,7 @@
             docfrag = document.createDocumentFragment(),
             container = document.createElement('div'),
             header = document.createElement('div'),
+            header_header = document.createElement('div'),
             body = document.createElement('div'),
             action = document.createElement('div'),
             cancel = document.createElement('button'),
@@ -312,6 +305,8 @@
         this._addClass(header, 'header');
         // add header to container
         container.appendChild(header);
+        this._addId(header_header, 'header_header');
+        header.appendChild(header_header);
         this._addClass(body, 'body');
         body.appendChild(action);
         // add body to container
@@ -328,8 +323,8 @@
               previous = document.createElement('li'),
               current = document.createElement('li'),
               next = document.createElement('li'),
-              left = document.createElement('button'),
-              right = document.createElement('button'),
+              left = document.createElement('i'),
+              right = document.createElement('i'),
               years = document.createElement('ul');
 
           // inside header
@@ -341,11 +336,11 @@
           this._addId(titleDay, 'titleDay');
           this._addId(titleMonth, 'titleMonth');
           // add title stuff to it
-          title.appendChild(titleDay);
           title.appendChild(titleMonth);
+          title.appendChild(titleDay);
+          title.appendChild(subtitle);
           // add them to header
           header.appendChild(title);
-          header.appendChild(subtitle);
           // inside body
           // inside viewHolder
           this._addId(viewHolder, 'viewHolder');
@@ -368,16 +363,14 @@
           views.appendChild(next);
           // inside body again
           this._addId(left, 'left');
-          left.classList.add('mddtp-button');
+          left.classList.add('ion');
+          left.classList.add('ion-ios-arrow-left');
           this._addClass(left, 'left');
-          left.setAttribute('type', 'button');
-          left.innerHTML = this._prevHandle;
 
           this._addId(right, 'right');
-          right.classList.add('mddtp-button');
+          right.classList.add('ion');
+          right.classList.add('ion-ios-arrow-right');
           this._addClass(right, 'right');
-          right.setAttribute('type', 'button');
-          right.innerHTML = this._nextHandle;
 
           this._addId(years, 'years');
           this._addClass(years, 'years', ['mddtp-picker__years--invisible', 'animated']);
@@ -389,7 +382,6 @@
 
           this._addId(now, 'now');
           now.classList.add('mddtp-button');
-          now.setAttribute('type', 'button');
           action.appendChild(now);
         } else {
           var _title = document.createElement('div'),
@@ -492,10 +484,8 @@
 
         this._addId(cancel, 'cancel');
         cancel.classList.add('mddtp-button');
-        cancel.setAttribute('type', 'button');
         this._addId(ok, 'ok');
         ok.classList.add('mddtp-button');
-        ok.setAttribute('type', 'button');
         // add actions
         action.appendChild(cancel);
         action.appendChild(ok);
@@ -717,9 +707,10 @@
             titleDay = this._sDialog.titleDay,
             titleMonth = this._sDialog.titleMonth;
 
+        this._fillText(this._sDialog.header_header, m.format('dddd hh:mm a'));
         this._fillText(subtitle, m.format('YYYY'));
-        this._fillText(titleDay, m.format('ddd'));
-        this._fillText(titleMonth, m.format('MMM D'));
+        this._fillText(titleDay, m.format('D'));
+        this._fillText(titleMonth, m.format('MMM'));
         this._initYear();
         this._initViewHolder();
         this._attachEventHandlers();
@@ -1077,9 +1068,10 @@
           // update temp date object with the date selected
           this._sDialog.sDate = currentDate.clone();
 
+          this._fillText(this._sDialog.header_header, m.format('dddd hh:mm a'));
           this._fillText(subtitle, currentDate.year());
-          this._fillText(titleDay, currentDate.format('ddd'));
-          this._fillText(titleMonth, currentDate.format('MMM D'));
+          this._fillText(titleDay, currentDate.format('D'));
+          this._fillText(titleMonth, currentDate.format('MMM'));
 
           if (this._autoClose === !0) {
             this._sDialog.ok.onclick();

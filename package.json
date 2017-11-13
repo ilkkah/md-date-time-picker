@@ -67,8 +67,7 @@
     "run-sequence": "^1.2.2"
   },
   "dependencies": {
-    "draggabilly": "^2.1.1",
-    "moment": "^2.17.1"
+    "moment": "2.10.3"
   },
   "repository": {
     "type": "git",
