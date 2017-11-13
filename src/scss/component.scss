@@ -32,9 +32,9 @@
 .mddtp-button:active {
   background-color: $md-button-color--active;
 }
-.mddtp-button:disabled {
-  color: $md-button-color--disabled;
-  cursor: not-allowed;
+
+.mddtp-button--disabled {
+  display: none;
 }
 //date or time component dialog
 .mddtp-picker {

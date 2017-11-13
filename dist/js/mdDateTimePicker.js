@@ -499,31 +499,16 @@
       key: '_setHourActive',
       value: function _setHourActive() {
         this._sDialog.hneedle.classList.add('mddtp-picker__active');
-        console.log('_setHourActive', this._sDialog.hneedle);
-        console.log(this._sDialog.hneedle.classList);
       }
     }, {
       key: '_toggleHourMinute',
       value: function _toggleHourMinute() {
-        console.log('_toggleHourMinute (1)');
-        console.log(this._sDialog.hneedle);
-        console.log(this._sDialog.mneedle);
-        console.log(this._sDialog.hneedle.classList);
-        console.log(this._sDialog.mneedle.classList);
-        console.log(this._sDialog.hneedle.classList.contains('mddtp-picker__active'));
         this._sDialog.hneedle.classList.toggle('mddtp-picker__active');
         this._sDialog.mneedle.classList.toggle('mddtp-picker__active');
-        console.log('_toggleHourMinute (2)');
-        console.log(this._sDialog.hneedle);
-        console.log(this._sDialog.mneedle);
-        console.log(this._sDialog.hneedle.classList);
-        console.log(this._sDialog.mneedle.classList);
-        console.log(this._sDialog.hneedle.classList.contains('mddtp-picker__active'));
       }
     }, {
       key: '_initTimeDialog',
       value: function _initTimeDialog(m) {
-        console.log('_initTimeDialog');
         var hour = this._sDialog.hour,
             minute = this._sDialog.minute,
             subtitle = this._sDialog.subtitle,
@@ -582,7 +567,6 @@
             docfrag = document.createDocumentFragment(),
             hourNow = void 0;
 
-        console.log('_initHour this._mode', this._mode);
         if (this._mode) {
           var degreeStep = this._inner24 === !0 ? 10 : 5;
           hourNow = parseInt(this._sDialog.tDate.format('H'), 10);
@@ -647,7 +631,6 @@
     }, {
       key: '_initMinute',
       value: function _initMinute() {
-        console.log('_initMinute');
         var minuteView = this._sDialog.minuteView,
             minuteNow = parseInt(this._sDialog.tDate.format('m'), 10),
             mneedle = this._sDialog.mneedle,
@@ -689,9 +672,6 @@
         spoke = 60;
         value = parseInt(this._sDialog.tDate.format('m'), 10);
         var rotationClass = this._calcRotation(spoke, parseInt(value, 10));
-        console.log('spoke', spoke);
-        console.log('value', value);
-        console.log('rotationClass', rotationClass);
         if (rotationClass) {
           mneedle.classList.add(rotationClass);
         }
@@ -859,8 +839,6 @@
 
         // move the needle to correct position
         me._removeRotation(needle);
-        console.log('_pointNeedle, mdDateTimePicker.dialog.view', mdDateTimePicker.dialog.view);
-        console.log('_pointNeedle, me._mode', me._mode);
         // mdDateTimePicker.dialog.view = false: minute mode
         // mdDateTimePicker.dialog.view = true: hour mode
         if (!mdDateTimePicker.dialog.view) {
@@ -888,8 +866,6 @@
           value = me._sDialog.sDate.format('h');
         }
         var rotationClass = me._calcRotation(spoke, parseInt(value, 10));
-        console.log('spoke', spoke);
-        console.log('rotationClass', rotationClass);
         if (rotationClass) {
           needle.classList.add(rotationClass);
         }
@@ -898,7 +874,6 @@
       key: '_switchToView',
       value: function _switchToView(el) {
         var me = this;
-        console.log('_switchToView... ', el, this._type, this._inner24, me._mode);
         // attach the view change button
         if (this._type === 'date') {
           el.onclick = function () {
@@ -938,7 +913,6 @@
         // move the needle to correct position
         // toggle the view type
         mdDateTimePicker.dialog.view = !mdDateTimePicker.dialog.view;
-        console.log('_switchToTimeView, mdDateTimePicker.dialog.view', mdDateTimePicker.dialog.view);
         me._toggleHourMinute();
         me._pointNeedle(me);
       }
@@ -973,7 +947,6 @@
         title.classList.toggle('mddtp-picker__color--active');
         subtitle.classList.toggle('mddtp-picker__color--active');
         mdDateTimePicker.dialog.view = !mdDateTimePicker.dialog.view;
-        console.log('_switchToDateView, mdDateTimePicker.dialog.view', mdDateTimePicker.dialog.view);
         setTimeout(function () {
           el.removeAttribute('disabled');
         }, 300);
@@ -987,7 +960,6 @@
             sClass = 'mddtp-picker__cell--selected';
 
         hourView.onclick = function (e) {
-          console.log('hourView.onclick');
           var sHour = 'mddtp-hour__selected',
               selectedHour = document.getElementById(sHour),
               setHour = 0;
@@ -1018,7 +990,6 @@
           }
         };
         minuteView.onclick = function (e) {
-          console.log('minuteView.onclick');
           var sMinute = 'mddtp-minute__selected',
               selectedMinute = document.getElementById(sMinute),
               setMinute = 0;
@@ -1068,7 +1039,7 @@
           // update temp date object with the date selected
           this._sDialog.sDate = currentDate.clone();
 
-          this._fillText(this._sDialog.header_header, m.format('dddd hh:mm a'));
+          this._fillText(this._sDialog.header_header, currentDate.format('dddd hh:mm a'));
           this._fillText(subtitle, currentDate.year());
           this._fillText(titleDay, currentDate.format('D'));
           this._fillText(titleMonth, currentDate.format('MMM'));
@@ -1129,6 +1100,11 @@
           *
           * @type {Boolean}
           */
+          if (me.movingStep) {
+            return;
+          }
+
+          me.movingStep = !0;
           var stepBack = !1,
               next = me._sDialog.next,
               current = me._sDialog.current,
@@ -1194,6 +1170,8 @@
             if (!right.classList.contains('mddtp-button--disabled')) {
               right.removeAttribute('disabled');
             }
+
+            me.movingStep = !1;
           }, 400);
         }
       }
@@ -1371,7 +1349,6 @@
             onCancel = new CustomEvent('onCancel'),
             onOk = new CustomEvent('onOk');
 
-        console.log('now', now);
         if (now) now.onclick = function (e) {
           me._cellClicked({ target: me.todaycell }, (0, _moment2.default)());
           now.blur();
