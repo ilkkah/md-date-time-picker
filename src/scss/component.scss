@@ -16,6 +16,7 @@
   outline: none;
   cursor: pointer;
   color: $md-button-color;
+  font-weight: 400;
   // Correct inability to style clickable `input` types in iOS.
   -webkit-appearance: button;
   // Address `overflow` set to `hidden` in IE 8/9/10/11.
@@ -95,14 +96,14 @@
   }
 }
 //date component dialog
-.mddtp-picker__left {
+#mddtp__left.mddtp-picker__left {
   left: 4px;
 }
-.mddtp-picker__right {
+#mddtp__right.mddtp-picker__right {
   right: 4px;
 }
-.mddtp-picker__left,
-.mddtp-picker__right {
+#mddtp__left.mddtp-picker__left,
+#mddtp__right.mddtp-picker__right {
   position: absolute;
   text-align: center;
   line-height: 48px;
@@ -391,19 +392,6 @@
     font-size: 80%;
 }
 
-// prev/next handles
-.mddtp-picker__left {
-  .mddtp-prev-handle{
-    width: 100%;
-    height: 100%;
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-image: url($picker-button-left);
-  }
-  &:disabled .mddtp-prev-handle{
-    background-image: url($picker-button-left-disabled);
-  }
-}
 
 //60 minute deg rotations
 @for $i from 1 through 120 {
