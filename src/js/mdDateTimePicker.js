@@ -10,7 +10,6 @@
 * import necessary components
 */
 import moment from 'moment'
-// import Draggabilly from 'draggabilly'
 
 class mdDateTimePicker {
   /**
@@ -24,7 +23,6 @@ class mdDateTimePicker {
   * @param  {moment}   future                                           [the future moment till which the calendar shall render] [@default = init]
   * @param  {Boolean}  mode                                             [this value tells whether the time dialog will have the 24 hour mode (true) or 12 hour mode (false)] [@default = false]
   * @param  {String}   orientation = 'LANDSCAPE' or 'PORTRAIT'          [force the orientation of the picker @default = 'LANDSCAPE']
-  * @param  {element}  trigger                                          [element on which all the events will be dispatched e.g var foo = document.getElementById('bar'), here element = foo]
   * @param  {String}  ok = 'ok'                                         [ok button's text]
   * @param  {String}  cancel = 'cancel'                                 [cancel button's text]
   * @param  {Boolean} colon = true                                      [add an option to enable quote in 24 hour mode]
@@ -40,7 +38,6 @@ class mdDateTimePicker {
     future = moment().add(21, 'years'),
     mode = false,
     orientation = 'LANDSCAPE',
-    trigger = '',
     timebutton = 'time',
     calendarbutton = 'calendar',
     now = 'now',
@@ -56,7 +53,6 @@ class mdDateTimePicker {
     this._future = future
     this._mode = mode
     this._orientation = orientation
-    this._trigger = trigger
     this._calendarbutton = calendarbutton
     this._timebutton = timebutton
     this._now = now
@@ -65,6 +61,7 @@ class mdDateTimePicker {
     this._colon = colon
     this._autoClose = autoClose
     this._inner24 = inner24
+    this._listeners = {}
 
     /**
     * [dialog selected classes have the same structure as dialog but one level down]
@@ -97,6 +94,19 @@ class mdDateTimePicker {
     this._buildTimeDialog(this._sDialog.sDate)
   }
 
+  on (type, fn) {
+    this._listeners[type] = this._listeners[type] || []
+    this._listeners[type].push(fn)    
+  }
+
+  fire (type, data) {
+    if (this._listeners[type]) {
+      this._listeners[type].forEach((fn) => {
+        fn(data)
+      })
+    }
+  }
+
   /**
   * [time to get or set the current picker's moment]
   *
@@ -110,22 +120,6 @@ class mdDateTimePicker {
   set time (m) {
     if (m) {
       this._init = m
-    }
-  }
-
-  /**
-  * [trigger sets a new trigger for the dialog]
-  *
-  * @method trigger
-  *
-  */
-  get trigger () {
-    return this._trigger
-  }
-
-  set trigger (el) {
-    if (el) {
-      this._trigger = el
     }
   }
 
@@ -182,7 +176,6 @@ class mdDateTimePicker {
   *
   */
   toggle () {
-    console.log('toggle', mdDateTimePicker.dialog.state)
     this._selectDialog()
     // work according to the current state of the dialog
     if (mdDateTimePicker.dialog.state) {
@@ -572,9 +565,6 @@ class mdDateTimePicker {
     this._buildMinuteView()
     this._attachEventHandlers()
     this._changeM()
-    // this._dragDial()
-    // this._switchToView(hour)
-    // this._switchToView(minute)
     this._addClockEvent()
     this._setButtonText()
     this._setHourActive()
@@ -583,8 +573,6 @@ class mdDateTimePicker {
   _buildHourView () {
     const hourView = this._sDialog.hourView
     const hneedle = this._sDialog.hneedle
-    // const hour = 'mddtp-hour__selected'
-    // const selected = 'mddtp-picker__cell--selected'
     const rotate = 'mddtp-picker__cell--rotate-'
     const rotate24 = 'mddtp-picker__cell--rotate24'
     const cell = 'mddtp-picker__cell'
@@ -987,7 +975,6 @@ class mdDateTimePicker {
   *
   */
   _switchToDateView (el, me) {
-    console.log('_switchToDateView')
     el.setAttribute('disabled', '')
     const viewHolder = me._sDialog.viewHolder
     const years = me._sDialog.years
@@ -1229,7 +1216,6 @@ class mdDateTimePicker {
   *
   */
   _changeYear (el) {
-    console.log('_changeYear', el);
     const me = this
     el.onclick = function (e) {
       if (e.target && e.target.nodeName === 'LI') {
@@ -1282,113 +1268,6 @@ class mdDateTimePicker {
     AM.onclick = PM.onclick = toggle
   }
 
-  _dragDial () {
-    const me = this
-    const needle = this._sDialog.needle
-    const circle = this._sDialog.circle
-    const fakeNeedle = this._sDialog.fakeNeedle
-    const circularHolder = this._sDialog.circularHolder
-    const minute = this._sDialog.minute
-    const quick = 'mddtp-picker__selection--quick'
-    const selection = 'mddtp-picker__selection'
-    const selected = 'mddtp-picker__cell--selected'
-    const rotate = 'mddtp-picker__cell--rotate-'
-    let hOffset = circularHolder.getBoundingClientRect()
-    let divides
-    // const fakeNeedleDraggabilly = new Draggabilly(fakeNeedle, {
-    //   containment: true
-    // })
-    // fakeNeedleDraggabilly.on('pointerDown', () => {
-    //   // console.info ( 'pointerDown' , e );
-    //   hOffset = circularHolder.getBoundingClientRect()
-    // })
-    /**
-     * netTrek
-     * fixes for iOS - drag
-     */
-    // fakeNeedleDraggabilly.on('pointerMove', (e) => {
-    //   let clientX = e.clientX
-    //   let clientY = e.clientY
-
-    //   if (clientX === undefined) {
-    //     if (e.pageX === undefined) {
-    //       if (e.touches && e.touches.length > 0) {
-    //         clientX = e.touches[0].clientX
-    //         clientY = e.touches[0].clientY
-    //       } else {
-    //         throw new Error('coult not detect pageX, pageY')
-    //       }
-    //     } else {
-    //       clientX = e.pageX - document.body.scrollLeft - document.documentElement.scrollLeft
-    //       clientY = e.pageY - document.body.scrollTop - document.documentElement.scrollTop
-    //     }
-    //   }
-    //   // console.info ( 'Drag clientX' , clientX, clientY, e );
-
-    //   const xPos = clientX - hOffset.left - (hOffset.width / 2)
-    //   const yPos = clientY - hOffset.top - (hOffset.height / 2)
-
-    //   let slope = Math.atan2(-yPos, xPos)
-    //   needle.className = ''
-    //   if (slope < 0) {
-    //     slope += 2 * Math.PI
-    //   }
-    //   slope *= 180 / Math.PI
-    //   slope = 360 - slope
-    //   if (slope > 270) {
-    //     slope -= 360
-    //   }
-    //   divides = parseInt(slope / 6)
-    //   const same = Math.abs((6 * divides) - slope)
-    //   const upper = Math.abs((6 * (divides + 1)) - slope)
-    //   if (upper < same) {
-    //     divides++
-    //   }
-    //   divides += 15
-    //   needle.classList.add(selection)
-    //   needle.classList.add(quick)
-    //   needle.classList.add(rotate + (divides * 2))
-    // })
-    /**
-     * netTrek
-     * fixes for iOS - drag
-     */
-    // const onDragEnd = function () {
-    //   const minuteViewChildren = me._sDialog.minuteView.getElementsByTagName('div')
-    //   const sMinute = 'mddtp-minute__selected'
-    //   const selectedMinute = document.getElementById(sMinute)
-    //   const cOffset = circle.getBoundingClientRect()
-    //   fakeNeedle.setAttribute('style', `left:${cOffset.left - hOffset.left}px;top:${cOffset.top - hOffset.top}px`)
-    //   needle.classList.remove(quick)
-    //   let select = divides
-    //   if (select === 1) {
-    //     select = 60
-    //   }
-    //   select = me._nearestDivisor(select, 5)
-    //   // normalize 60 => 0
-    //   if (divides === 60) {
-    //     divides = 0
-    //   }
-    //   // remove previously selected value
-    //   if (selectedMinute) {
-    //     selectedMinute.id = ''
-    //     selectedMinute.classList.remove(selected)
-    //   }
-    //   // add the new selected
-    //   if (select > 0) {
-    //     select /= 5
-    //     select--
-    //     minuteViewChildren[select].id = sMinute
-    //     minuteViewChildren[select].classList.add(selected)
-    //   }
-    //   minute.textContent = me._numWithZero(divides)
-    //   me._sDialog.sDate.minutes(divides)
-    // }
-
-    // fakeNeedleDraggabilly.on('pointerUp', onDragEnd)
-    // fakeNeedleDraggabilly.on('dragEnd', onDragEnd)
-  }
-
   /**
   * [_attachEventHandlers attach event handlers for actions to the date or time picker dialog]
   *
@@ -1436,17 +1315,13 @@ class mdDateTimePicker {
 
     cancel.onclick = function () {
       me.toggle()
-      if (me._trigger) {
-        me._trigger.dispatchEvent(onCancel)
-      }
+      me.fire('cancel')
     }
 
     ok.onclick = function () {
       me._init = me._sDialog.sDate
       me.toggle()
-      if (me._trigger) {
-        me._trigger.dispatchEvent(onOk)
-      }
+      me.fire('ok', me._sDialog.sDate.toDate())
     }
   }
 

@@ -61,7 +61,6 @@
     * @param  {moment}   future                                           [the future moment till which the calendar shall render] [@default = init]
     * @param  {Boolean}  mode                                             [this value tells whether the time dialog will have the 24 hour mode (true) or 12 hour mode (false)] [@default = false]
     * @param  {String}   orientation = 'LANDSCAPE' or 'PORTRAIT'          [force the orientation of the picker @default = 'LANDSCAPE']
-    * @param  {element}  trigger                                          [element on which all the events will be dispatched e.g var foo = document.getElementById('bar'), here element = foo]
     * @param  {String}  ok = 'ok'                                         [ok button's text]
     * @param  {String}  cancel = 'cancel'                                 [cancel button's text]
     * @param  {Boolean} colon = true                                      [add an option to enable quote in 24 hour mode]
@@ -82,8 +81,6 @@
           mode = _ref$mode === undefined ? !1 : _ref$mode,
           _ref$orientation = _ref.orientation,
           orientation = _ref$orientation === undefined ? 'LANDSCAPE' : _ref$orientation,
-          _ref$trigger = _ref.trigger,
-          trigger = _ref$trigger === undefined ? '' : _ref$trigger,
           _ref$timebutton = _ref.timebutton,
           timebutton = _ref$timebutton === undefined ? 'time' : _ref$timebutton,
           _ref$calendarbutton = _ref.calendarbutton,
@@ -109,7 +106,6 @@
       this._future = future;
       this._mode = mode;
       this._orientation = orientation;
-      this._trigger = trigger;
       this._calendarbutton = calendarbutton;
       this._timebutton = timebutton;
       this._now = now;
@@ -118,6 +114,7 @@
       this._colon = colon;
       this._autoClose = autoClose;
       this._inner24 = inner24;
+      this._listeners = {};
 
       /**
       * [dialog selected classes have the same structure as dialog but one level down]
@@ -149,15 +146,22 @@
       this._buildTimeDialog(this._sDialog.sDate);
     }
 
-    /**
-    * [time to get or set the current picker's moment]
-    *
-    * @method time
-    *
-    */
-
-
     _createClass(mdDateTimePicker, [{
+      key: 'on',
+      value: function on(type, fn) {
+        this._listeners[type] = this._listeners[type] || [];
+        this._listeners[type].push(fn);
+      }
+    }, {
+      key: 'fire',
+      value: function fire(type, data) {
+        if (this._listeners[type]) {
+          this._listeners[type].forEach(function (fn) {
+            fn(data);
+          });
+        }
+      }
+    }, {
       key: 'hide',
       value: function hide() {
         this._selectDialog();
@@ -186,7 +190,6 @@
     }, {
       key: 'toggle',
       value: function toggle() {
-        console.log('toggle', mdDateTimePicker.dialog.state);
         this._selectDialog();
         // work according to the current state of the dialog
         if (mdDateTimePicker.dialog.state) {
@@ -548,9 +551,6 @@
         this._buildMinuteView();
         this._attachEventHandlers();
         this._changeM();
-        // this._dragDial()
-        // this._switchToView(hour)
-        // this._switchToView(minute)
         this._addClockEvent();
         this._setButtonText();
         this._setHourActive();
@@ -564,8 +564,6 @@
             rotate24 = 'mddtp-picker__cell--rotate24',
             cell = 'mddtp-picker__cell',
             docfrag = document.createDocumentFragment();
-        // const hour = 'mddtp-hour__selected'
-        // const selected = 'mddtp-picker__cell--selected'
 
         // let hourNow
         if (this._mode) {
@@ -956,7 +954,6 @@
     }, {
       key: '_switchToDateView',
       value: function _switchToDateView(el, me) {
-        console.log('_switchToDateView');
         el.setAttribute('disabled', '');
         var viewHolder = me._sDialog.viewHolder,
             years = me._sDialog.years,
@@ -1202,7 +1199,6 @@
     }, {
       key: '_changeYear',
       value: function _changeYear(el) {
-        console.log('_changeYear', el);
         var me = this;
         el.onclick = function (e) {
           if (e.target && e.target.nodeName === 'LI') {
@@ -1249,114 +1245,6 @@
         AM.onclick = PM.onclick = toggle;
       }
     }, {
-      key: '_dragDial',
-      value: function _dragDial() {
-        // const fakeNeedleDraggabilly = new Draggabilly(fakeNeedle, {
-        //   containment: true
-        // })
-        // fakeNeedleDraggabilly.on('pointerDown', () => {
-        //   // console.info ( 'pointerDown' , e );
-        //   hOffset = circularHolder.getBoundingClientRect()
-        // })
-        /**
-         * netTrek
-         * fixes for iOS - drag
-         */
-        // fakeNeedleDraggabilly.on('pointerMove', (e) => {
-        //   let clientX = e.clientX
-        //   let clientY = e.clientY
-
-        //   if (clientX === undefined) {
-        //     if (e.pageX === undefined) {
-        //       if (e.touches && e.touches.length > 0) {
-        //         clientX = e.touches[0].clientX
-        //         clientY = e.touches[0].clientY
-        //       } else {
-        //         throw new Error('coult not detect pageX, pageY')
-        //       }
-        //     } else {
-        //       clientX = e.pageX - document.body.scrollLeft - document.documentElement.scrollLeft
-        //       clientY = e.pageY - document.body.scrollTop - document.documentElement.scrollTop
-        //     }
-        //   }
-        //   // console.info ( 'Drag clientX' , clientX, clientY, e );
-
-        //   const xPos = clientX - hOffset.left - (hOffset.width / 2)
-        //   const yPos = clientY - hOffset.top - (hOffset.height / 2)
-
-        //   let slope = Math.atan2(-yPos, xPos)
-        //   needle.className = ''
-        //   if (slope < 0) {
-        //     slope += 2 * Math.PI
-        //   }
-        //   slope *= 180 / Math.PI
-        //   slope = 360 - slope
-        //   if (slope > 270) {
-        //     slope -= 360
-        //   }
-        //   divides = parseInt(slope / 6)
-        //   const same = Math.abs((6 * divides) - slope)
-        //   const upper = Math.abs((6 * (divides + 1)) - slope)
-        //   if (upper < same) {
-        //     divides++
-        //   }
-        //   divides += 15
-        //   needle.classList.add(selection)
-        //   needle.classList.add(quick)
-        //   needle.classList.add(rotate + (divides * 2))
-        // })
-        /**
-         * netTrek
-         * fixes for iOS - drag
-         */
-        // const onDragEnd = function () {
-        //   const minuteViewChildren = me._sDialog.minuteView.getElementsByTagName('div')
-        //   const sMinute = 'mddtp-minute__selected'
-        //   const selectedMinute = document.getElementById(sMinute)
-        //   const cOffset = circle.getBoundingClientRect()
-        //   fakeNeedle.setAttribute('style', `left:${cOffset.left - hOffset.left}px;top:${cOffset.top - hOffset.top}px`)
-        //   needle.classList.remove(quick)
-        //   let select = divides
-        //   if (select === 1) {
-        //     select = 60
-        //   }
-        //   select = me._nearestDivisor(select, 5)
-        //   // normalize 60 => 0
-        //   if (divides === 60) {
-        //     divides = 0
-        //   }
-        //   // remove previously selected value
-        //   if (selectedMinute) {
-        //     selectedMinute.id = ''
-        //     selectedMinute.classList.remove(selected)
-        //   }
-        //   // add the new selected
-        //   if (select > 0) {
-        //     select /= 5
-        //     select--
-        //     minuteViewChildren[select].id = sMinute
-        //     minuteViewChildren[select].classList.add(selected)
-        //   }
-        //   minute.textContent = me._numWithZero(divides)
-        //   me._sDialog.sDate.minutes(divides)
-        // }
-
-        // fakeNeedleDraggabilly.on('pointerUp', onDragEnd)
-        // fakeNeedleDraggabilly.on('dragEnd', onDragEnd)
-        var me = this,
-            needle = this._sDialog.needle,
-            circle = this._sDialog.circle,
-            fakeNeedle = this._sDialog.fakeNeedle,
-            circularHolder = this._sDialog.circularHolder,
-            minute = this._sDialog.minute,
-            quick = 'mddtp-picker__selection--quick',
-            selection = 'mddtp-picker__selection',
-            selected = 'mddtp-picker__cell--selected',
-            rotate = 'mddtp-picker__cell--rotate-',
-            hOffset = circularHolder.getBoundingClientRect(),
-            divides = void 0;
-      }
-    }, {
       key: '_attachEventHandlers',
       value: function _attachEventHandlers() {
         var me = this,
@@ -1399,17 +1287,13 @@
 
         cancel.onclick = function () {
           me.toggle();
-          if (me._trigger) {
-            me._trigger.dispatchEvent(onCancel);
-          }
+          me.fire('cancel');
         };
 
         ok.onclick = function () {
           me._init = me._sDialog.sDate;
           me.toggle();
-          if (me._trigger) {
-            me._trigger.dispatchEvent(onOk);
-          }
+          me.fire('ok', me._sDialog.sDate.toDate());
         };
       }
     }, {
@@ -1529,16 +1413,6 @@
       set: function set(m) {
         if (m) {
           this._init = m;
-        }
-      }
-    }, {
-      key: 'trigger',
-      get: function get() {
-        return this._trigger;
-      },
-      set: function set(el) {
-        if (el) {
-          this._trigger = el;
         }
       }
     }], [{
