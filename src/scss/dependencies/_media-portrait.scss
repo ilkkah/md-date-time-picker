@@ -12,32 +12,27 @@
 .mddtp-picker__header,
 .mddtp-picker__body {
   display: block;
-  height: 100%;
   width: 100%;
 }
 // specific to date dialog
-&.mddtp-picker-date {
-  .mddtp-picker__title div {
-    display: block;
-  }
+.mddtp-picker__title div {
+  display: block;
 }
 
 // specific to time dialog
-&.mddtp-picker-time {
-  .mddtp-picker__header {
-    width: 100%;
-    .mddtp-picker__title {
-      display: inline-block;
-    }
-    .mddtp-picker__subtitle {
-      display: inline-block;
-      margin-left: 16px;
-    }
+.mddtp-picker__header {
+  width: 100%;
+  .mddtp-picker__title {
+    display: inline-block;
   }
-  .mddtp-picker__body {
-    padding-top: 20px;
-  }
-  .mddtp-picker__circularHolder {
-    margin-top: 0;
+  .mddtp-picker__subtitle {
+    display: inline-block;
   }
 }
+.mddtp-picker__body {
+  padding-top: 20px;
+}
+.mddtp-picker__circularHolder {
+  margin-top: 0;
+}
+

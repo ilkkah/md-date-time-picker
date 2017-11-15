@@ -84,6 +84,10 @@
           orientation = _ref$orientation === undefined ? 'LANDSCAPE' : _ref$orientation,
           _ref$trigger = _ref.trigger,
           trigger = _ref$trigger === undefined ? '' : _ref$trigger,
+          _ref$timebutton = _ref.timebutton,
+          timebutton = _ref$timebutton === undefined ? 'time' : _ref$timebutton,
+          _ref$calendarbutton = _ref.calendarbutton,
+          calendarbutton = _ref$calendarbutton === undefined ? 'calendar' : _ref$calendarbutton,
           _ref$now = _ref.now,
           now = _ref$now === undefined ? 'now' : _ref$now,
           _ref$ok = _ref.ok,
@@ -106,6 +110,8 @@
       this._mode = mode;
       this._orientation = orientation;
       this._trigger = trigger;
+      this._calendarbutton = calendarbutton;
+      this._timebutton = timebutton;
       this._now = now;
       this._ok = ok;
       this._cancel = cancel;
@@ -124,10 +130,23 @@
       */
       this._sDialog = {};
 
+      this._sDialog.tDate = this._init.clone();
+      this._sDialog.sDate = this._init.clone();
+
       // attach the dialog if not present
-      if (typeof document !== 'undefined' && !document.getElementById('mddtp-picker__' + this._type)) {
+      if (typeof document !== 'undefined' && !document.getElementById('mddtp-picker')) {
         this._buildDialog();
       }
+
+      var sDialogEls = ['viewHolder', 'years', 'header', 'timebutton', 'calendarbutton', 'now', 'cancel', 'ok', 'left', 'right', 'previous', 'current', 'next', 'header_header', 'subtitle', 'title', 'titleDay', 'titleMonth', 'AM', 'PM', 'hneedle', 'mneedle', 'hourView', 'minuteView', 'hour', 'minute', 'fakeNeedle', 'circularHolder', 'circle', 'dotSpan'],
+          i = sDialogEls.length;
+
+      while (i--) {
+        this._sDialog[sDialogEls[i]] = document.getElementById('mddtp__' + sDialogEls[i]);
+      }
+
+      this._buildDateDialog(this._sDialog.sDate);
+      this._buildTimeDialog(this._sDialog.sDate);
     }
 
     /**
@@ -148,11 +167,6 @@
       key: 'show',
       value: function show() {
         this._selectDialog();
-        if (this._type === 'date') {
-          this._initDateDialog(this._init);
-        } else if (this._type === 'time') {
-          this._initTimeDialog(this._init);
-        }
         this._showDialog();
       }
     }, {
@@ -181,24 +195,28 @@
         }
       }
     }, {
+      key: 'toggleType',
+      value: function toggleType() {
+        this._type = this._type == 'date' ? 'time' : 'date';
+
+        if (this._type == 'date') {
+          mdDateTimePicker.dialog.view = !1;
+          this._switchToDateView(this._sDialog.title, this);
+        } else {
+          this._switchToTimeView(this);
+        }
+
+        this._selectDialog();
+
+        this._sDialog.picker.classList.remove('mddtp-picker--date');
+        this._sDialog.picker.classList.remove('mddtp-picker--time');
+        this._sDialog.picker.classList.add('mddtp-picker--' + this._type);
+      }
+    }, {
       key: '_selectDialog',
       value: function _selectDialog() {
         // now do what you normally would do
-        this._sDialog.picker = document.getElementById('mddtp-picker__' + [this._type]);
-        /**
-        * [sDialogEls stores all inner components of the selected dialog or sDialog to be later getElementById]
-        *
-        * @type {Array}
-        */
-        var sDialogEls = ['viewHolder', 'years', 'header', 'now', 'cancel', 'ok', 'left', 'right', 'previous', 'current', 'next', 'header_header', 'subtitle', 'title', 'titleDay', 'titleMonth', 'AM', 'PM', 'hneedle', 'mneedle', 'hourView', 'minuteView', 'hour', 'minute', 'fakeNeedle', 'circularHolder', 'circle', 'dotSpan'],
-            i = sDialogEls.length;
-
-        while (i--) {
-          this._sDialog[sDialogEls[i]] = document.getElementById('mddtp-' + this._type + '__' + sDialogEls[i]);
-        }
-
-        this._sDialog.tDate = this._init.clone();
-        this._sDialog.sDate = this._init.clone();
+        this._sDialog.picker = document.getElementById('mddtp-picker');
       }
     }, {
       key: '_showDialog',
@@ -207,6 +225,9 @@
             zoomIn = 'zoomIn';
 
         mdDateTimePicker.dialog.state = !0;
+        this._sDialog.picker.classList.remove('mddtp-picker--date');
+        this._sDialog.picker.classList.remove('mddtp-picker--time');
+        this._sDialog.picker.classList.add('mddtp-picker--' + this._type);
         this._sDialog.picker.classList.remove('mddtp-picker--inactive');
         this._sDialog.picker.classList.add(zoomIn);
         // if the dialog is forced into portrait mode
@@ -296,26 +317,26 @@
         // action elements container
 
         // ... add properties to them
-        container.id = 'mddtp-picker__' + type;
+        container.id = 'mddtp-picker';
         container.classList.add('mddtp-picker');
-        container.classList.add('mddtp-picker-' + type);
         container.classList.add('mddtp-picker--inactive');
         container.classList.add('animated');
         this._addId(header, 'header');
         this._addClass(header, 'header');
         // add header to container
         container.appendChild(header);
+
         this._addId(header_header, 'header_header');
         header.appendChild(header_header);
+
         this._addClass(body, 'body');
         body.appendChild(action);
         // add body to container
         container.appendChild(body);
         // add stuff to header and body according to dialog type
-        if (this._type === 'date') {
-          var now = document.createElement('button'),
-              subtitle = document.createElement('div'),
-              title = document.createElement('div'),
+
+        function buildDate() {
+          var title = document.createElement('div'),
               titleDay = document.createElement('div'),
               titleMonth = document.createElement('div'),
               viewHolder = document.createElement('div'),
@@ -329,16 +350,14 @@
 
           // inside header
           // adding properties to them
-          this._addId(subtitle, 'subtitle');
-          this._addClass(subtitle, 'subtitle');
           this._addId(title, 'title');
           this._addClass(title, 'title', ['mddtp-picker__color--active']);
+          this._addClass(title, 'date-title');
           this._addId(titleDay, 'titleDay');
           this._addId(titleMonth, 'titleMonth');
           // add title stuff to it
           title.appendChild(titleMonth);
           title.appendChild(titleDay);
-          title.appendChild(subtitle);
           // add them to header
           header.appendChild(title);
           // inside body
@@ -379,16 +398,15 @@
           body.appendChild(left);
           body.appendChild(right);
           body.appendChild(years);
+        }
 
-          this._addId(now, 'now');
-          now.classList.add('mddtp-button');
-          action.appendChild(now);
-        } else {
-          var _title = document.createElement('div'),
+        function buildTime() {
+
+          var title = document.createElement('div'),
               hour = document.createElement('span'),
               span = document.createElement('span'),
               minute = document.createElement('span'),
-              _subtitle = document.createElement('div'),
+              subtitle = document.createElement('div'),
               AM = document.createElement('div'),
               PM = document.createElement('div'),
               circularHolder = document.createElement('div'),
@@ -399,22 +417,24 @@
               mline = document.createElement('span'),
               mcircle = document.createElement('span'),
               minuteView = document.createElement('div'),
-              fakeNeedle = document.createElement('div'),
               hourView = document.createElement('div');
+          // const fakeNeedle = document.createElement('div')
 
           // add properties to them
           // inside header
-          this._addId(_title, 'title');
-          this._addClass(_title, 'title');
+          this._addId(title, 'title');
+          this._addClass(title, 'title');
+          this._addClass(title, 'time-title');
           this._addId(hour, 'hour');
           hour.classList.add('mddtp-picker__color--active');
           span.textContent = ':';
           this._addId(span, 'dotSpan');
           span.setAttribute('style', 'display: none');
           this._addId(minute, 'minute');
-          this._addId(_subtitle, 'subtitle');
-          this._addClass(_subtitle, 'subtitle');
-          _subtitle.setAttribute('style', 'display: none');
+          this._addId(subtitle, 'subtitle');
+          this._addClass(subtitle, 'subtitle');
+          this._addClass(subtitle, 'time-subtitle');
+          subtitle.setAttribute('style', 'display: none');
           this._addClass(AM, 'am_pm');
           this._addClass(PM, 'am_pm');
           this._addId(AM, 'AM');
@@ -426,14 +446,14 @@
           // Change to 'PM' to Locale Meridiem
           PM.textContent = (0, _moment2.default)().localeData().meridiem(13, 1, !0);
           // add them to title and subtitle
-          _title.appendChild(hour);
-          _title.appendChild(span);
-          _title.appendChild(minute);
-          _subtitle.appendChild(AM);
-          _subtitle.appendChild(PM);
+          title.appendChild(hour);
+          title.appendChild(span);
+          title.appendChild(minute);
+          subtitle.appendChild(AM);
+          subtitle.appendChild(PM);
           // add them to header
-          header.appendChild(_title);
-          header.appendChild(_subtitle);
+          header.appendChild(title);
+          circularHolder.appendChild(subtitle);
           // inside body
           this._addId(circularHolder, 'circularHolder');
           this._addClass(circularHolder, 'circularHolder');
@@ -454,8 +474,8 @@
           this._addId(minuteView, 'minuteView');
           minuteView.classList.add('mddtp-picker__circularView');
           minuteView.classList.add('mddtp-picker__circularView--hidden');
-          this._addId(fakeNeedle, 'fakeNeedle');
-          fakeNeedle.classList.add('mddtp-picker__circle--fake');
+          // this._addId(fakeNeedle, 'fakeNeedle')
+          // fakeNeedle.classList.add('mddtp-picker__circle--fake')
           this._addId(hourView, 'hourView');
           hourView.classList.add('mddtp-picker__circularView');
 
@@ -471,11 +491,32 @@
           circularHolder.appendChild(hneedle);
           circularHolder.appendChild(mneedle);
           circularHolder.appendChild(minuteView);
-          circularHolder.appendChild(fakeNeedle);
+          // circularHolder.appendChild(fakeNeedle)
           circularHolder.appendChild(hourView);
           // add them to body
           body.appendChild(circularHolder);
         }
+
+        buildDate.call(this);
+        buildTime.call(this);
+
+        var now = document.createElement('button'),
+            timebutton = document.createElement('button'),
+            calendarbutton = document.createElement('button');
+
+
+        this._addId(timebutton, 'timebutton');
+        timebutton.classList.add('mddtp-button');
+        action.appendChild(timebutton);
+
+        this._addId(now, 'now');
+        now.classList.add('mddtp-button');
+        action.appendChild(now);
+
+        this._addId(calendarbutton, 'calendarbutton');
+        calendarbutton.classList.add('mddtp-button');
+        action.appendChild(calendarbutton);
+
         action.classList.add('mddtp-picker__action');
 
         if (this._autoClose === !0) {
@@ -499,27 +540,26 @@
       key: '_setHourActive',
       value: function _setHourActive() {
         this._sDialog.hneedle.classList.add('mddtp-picker__active');
+        this._sDialog.mneedle.classList.remove('mddtp-picker__active');
       }
     }, {
-      key: '_toggleHourMinute',
-      value: function _toggleHourMinute() {
-        this._sDialog.hneedle.classList.toggle('mddtp-picker__active');
-        this._sDialog.mneedle.classList.toggle('mddtp-picker__active');
+      key: '_setMinuteActive',
+      value: function _setMinuteActive() {
+        this._sDialog.hneedle.classList.remove('mddtp-picker__active');
+        this._sDialog.mneedle.classList.add('mddtp-picker__active');
       }
     }, {
-      key: '_initTimeDialog',
-      value: function _initTimeDialog(m) {
+      key: '_buildTimeDialog',
+      value: function _buildTimeDialog(m) {
         var hour = this._sDialog.hour,
             minute = this._sDialog.minute,
             subtitle = this._sDialog.subtitle,
             dotSpan = this._sDialog.dotSpan;
 
 
-        this._setHourActive();
-
         // switch according to 12 hour or 24 hour mode
-        // this._mode = true: hour
-        // this._mode = fals: minute
+        // this._mode = true: 24
+        // this._mode = false: 12
         if (this._mode) {
           // CHANGED exception case for 24 => 0 issue #57
           var text = parseInt(m.format('H'), 10);
@@ -544,8 +584,8 @@
           dotSpan.removeAttribute('style');
         }
         this._fillText(minute, m.format('mm'));
-        this._initHour();
-        this._initMinute();
+        this._buildHourView();
+        this._buildMinuteView();
         this._attachEventHandlers();
         this._changeM();
         // this._dragDial()
@@ -553,70 +593,73 @@
         this._switchToView(minute);
         this._addClockEvent();
         this._setButtonText();
+        this._setHourActive();
       }
     }, {
-      key: '_initHour',
-      value: function _initHour() {
+      key: '_buildHourView',
+      value: function _buildHourView() {
         var hourView = this._sDialog.hourView,
             hneedle = this._sDialog.hneedle,
-            hour = 'mddtp-hour__selected',
-            selected = 'mddtp-picker__cell--selected',
             rotate = 'mddtp-picker__cell--rotate-',
             rotate24 = 'mddtp-picker__cell--rotate24',
             cell = 'mddtp-picker__cell',
-            docfrag = document.createDocumentFragment(),
-            hourNow = void 0;
+            docfrag = document.createDocumentFragment();
+        // const hour = 'mddtp-hour__selected'
+        // const selected = 'mddtp-picker__cell--selected'
 
+        // let hourNow
         if (this._mode) {
           var degreeStep = this._inner24 === !0 ? 10 : 5;
-          hourNow = parseInt(this._sDialog.tDate.format('H'), 10);
-          for (var i = 1, j = degreeStep; i <= 24; i++, j += degreeStep) {
+          // hourNow = parseInt(this._sDialog.tDate.format('H'), 10)
+          for (var _i = 1, j = degreeStep; _i <= 24; _i++, j += degreeStep) {
             var div = document.createElement('div'),
                 span = document.createElement('span');
 
             div.classList.add(cell);
             // CHANGED exception case for 24 => 0 issue #57
-            if (i === 24) {
+            if (_i === 24) {
               span.textContent = '00';
             } else {
-              span.textContent = i;
+              span.textContent = _i;
             }
 
             var position = j;
-            if (this._inner24 === !0 && i > 12) {
+            if (this._inner24 === !0 && _i > 12) {
               position -= 120;
               div.classList.add(rotate24);
             }
 
             div.classList.add(rotate + position);
+            /*
             if (hourNow === i) {
-              div.id = hour;
-              div.classList.add(selected);
-              hneedle.classList.add(rotate + position);
+              div.id = hour
+              div.classList.add(selected)
+              hneedle.classList.add(rotate + position)
             }
             // CHANGED exception case for 24 => 0 issue #58
             if (i === 24 && hourNow === 0) {
-              div.id = hour;
-              div.classList.add(selected);
-              hneedle.classList.add(rotate + position);
+              div.id = hour
+              div.classList.add(selected)
+              hneedle.classList.add(rotate + position)
             }
+            */
             div.appendChild(span);
             docfrag.appendChild(div);
           }
         } else {
-          hourNow = parseInt(this._sDialog.tDate.format('h'), 10);
-          for (var _i = 1, _j = 10; _i <= 12; _i++, _j += 10) {
+          // hourNow = parseInt(this._sDialog.tDate.format('h'), 10)
+          for (var _i2 = 1, _j = 10; _i2 <= 12; _i2++, _j += 10) {
             var _div = document.createElement('div'),
                 _span = document.createElement('span');
 
             _div.classList.add(cell);
-            _span.textContent = _i;
+            _span.textContent = _i2;
             _div.classList.add(rotate + _j);
-            if (hourNow === _i) {
-              _div.id = hour;
-              _div.classList.add(selected);
-              hneedle.classList.add(rotate + _j);
-            }
+            // if (hourNow === i) {
+            //   div.id = hour
+            //   div.classList.add(selected)
+            //   hneedle.classList.add(rotate + j)
+            // }
             _div.appendChild(_span);
             docfrag.appendChild(_div);
           }
@@ -629,36 +672,36 @@
         hourView.appendChild(docfrag);
       }
     }, {
-      key: '_initMinute',
-      value: function _initMinute() {
+      key: '_buildMinuteView',
+      value: function _buildMinuteView() {
         var minuteView = this._sDialog.minuteView,
             minuteNow = parseInt(this._sDialog.tDate.format('m'), 10),
-            mneedle = this._sDialog.mneedle,
-            sMinute = 'mddtp-minute__selected',
-            selected = 'mddtp-picker__cell--selected',
             rotate = 'mddtp-picker__cell--rotate-',
             cell = 'mddtp-picker__cell',
             docfrag = document.createDocumentFragment();
+        // const mneedle = this._sDialog.mneedle
+        // const sMinute = 'mddtp-minute__selected'
+        // const selected = 'mddtp-picker__cell--selected'
 
-        for (var i = 5, j = 10; i <= 60; i += 5, j += 10) {
+        for (var _i3 = 5, j = 10; _i3 <= 60; _i3 += 5, j += 10) {
           var div = document.createElement('div'),
               span = document.createElement('span');
 
           div.classList.add(cell);
-          if (i === 60) {
+          if (_i3 === 60) {
             span.textContent = this._numWithZero(0);
           } else {
-            span.textContent = this._numWithZero(i);
+            span.textContent = this._numWithZero(_i3);
           }
           if (minuteNow === 0) {
             minuteNow = 60;
           }
           div.classList.add(rotate + j);
           // (minuteNow === 1 && i === 60) for corner case highlight 00 at 01
-          if (minuteNow === i || minuteNow - 1 === i || minuteNow + 1 === i || minuteNow === 1 && i === 60) {
-            div.id = sMinute;
-            div.classList.add(selected);
-          }
+          // if ((minuteNow === i) || (minuteNow - 1 === i) || (minuteNow + 1 === i) || (minuteNow === 1 && i === 60)) {
+          //   div.id = sMinute
+          //   div.classList.add(selected)
+          // }
           div.appendChild(span);
           docfrag.appendChild(div);
         }
@@ -667,36 +710,36 @@
           minuteView.removeChild(minuteView.lastChild);
         }
 
+        /*
         var spoke, value;
-
-        spoke = 60;
-        value = parseInt(this._sDialog.tDate.format('m'), 10);
-        var rotationClass = this._calcRotation(spoke, parseInt(value, 10));
+         spoke = 60
+        value = parseInt(this._sDialog.tDate.format('m'), 10)
+        const rotationClass = this._calcRotation(spoke, parseInt(value, 10))
         if (rotationClass) {
-          mneedle.classList.add(rotationClass);
+          mneedle.classList.add(rotationClass)
         }
+        */
 
         // set inner html accordingly
         minuteView.appendChild(docfrag);
       }
     }, {
-      key: '_initDateDialog',
-      value: function _initDateDialog(m) {
-        var subtitle = this._sDialog.subtitle,
-            title = this._sDialog.title,
-            titleDay = this._sDialog.titleDay,
-            titleMonth = this._sDialog.titleMonth;
-
+      key: '_updateHeader',
+      value: function _updateHeader(m) {
         this._fillText(this._sDialog.header_header, m.format('dddd hh:mm a'));
-        this._fillText(subtitle, m.format('YYYY'));
-        this._fillText(titleDay, m.format('D'));
-        this._fillText(titleMonth, m.format('MMM'));
+        this._fillText(this._sDialog.subtitle, m.year());
+        this._fillText(this._sDialog.titleDay, m.format('D'));
+        this._fillText(this._sDialog.titleMonth, m.format('MMM'));
+      }
+    }, {
+      key: '_buildDateDialog',
+      value: function _buildDateDialog(m) {
+        this._updateHeader(m);
         this._initYear();
         this._initViewHolder();
         this._attachEventHandlers();
         this._changeMonth();
-        this._switchToView(subtitle);
-        this._switchToView(title);
+        this._switchToView(this._sDialog.title);
         this._setButtonText();
       }
     }, {
@@ -716,14 +759,14 @@
           m = future.clone();
         }
         this._sDialog.tDate = m;
-        this._initMonth(current, m);
-        this._initMonth(next, (0, _moment2.default)(this._getMonth(m, 1)));
-        this._initMonth(previous, (0, _moment2.default)(this._getMonth(m, -1)));
+        this._buildMonth(current, m);
+        this._buildMonth(next, (0, _moment2.default)(this._getMonth(m, 1)));
+        this._buildMonth(previous, (0, _moment2.default)(this._getMonth(m, -1)));
         this._toMoveMonth();
       }
     }, {
-      key: '_initMonth',
-      value: function _initMonth(view, m) {
+      key: '_buildMonth',
+      value: function _buildMonth(view, m) {
         var displayMonth = m.format('MMMM YYYY'),
             innerDivs = view.getElementsByTagName('div');
         // get the .mddtp-picker__month element using innerDivs[0]
@@ -760,24 +803,24 @@
           selected = parseInt((0, _moment2.default)(this._sDialog.sDate).format('D'), 10);
           selected += firstDayOfMonth - 1;
         }
-        for (var i = 0; i < 42; i++) {
+        for (var _i4 = 0; _i4 < 42; _i4++) {
           // create cell
           var cell = document.createElement('span'),
-              currentDay = i - firstDayOfMonth + 1;
+              currentDay = _i4 - firstDayOfMonth + 1;
 
-          if (i >= firstDayOfMonth && i <= lastDayOfMonth) {
-            if (i > future || i < past) {
+          if (_i4 >= firstDayOfMonth && _i4 <= lastDayOfMonth) {
+            if (_i4 > future || _i4 < past) {
               cell.classList.add(cellClass + '--disabled');
             } else {
               cell.classList.add(cellClass);
             }
             this._fillText(cell, currentDay);
           }
-          if (today === i) {
+          if (today === _i4) {
             cell.classList.add(cellClass + '--today');
             this.todaycell = cell;
           }
-          if (selected === i) {
+          if (selected === _i4) {
             cell.classList.add(cellClass + '--selected');
             cell.id = 'mddtp-date__selected';
           }
@@ -822,49 +865,44 @@
       key: '_removeRotation',
       value: function _removeRotation(needle) {
         needle.classList.forEach(function (el) {
-          if (/rotate/.test(el)) {
+          if (el.indexOf('rotate') !== -1) {
             needle.classList.remove(el);
           }
         });
       }
     }, {
       key: '_pointNeedle',
-      value: function _pointNeedle(me) {
-        var spoke = 60,
+      value: function _pointNeedle(me, needle) {
+        var spoke = void 0,
             value = void 0,
-            circle = this._sDialog.circle,
-            fakeNeedle = this._sDialog.fakeNeedle,
-            circularHolder = this._sDialog.circularHolder,
-            needle = mdDateTimePicker.dialog.view ? me._sDialog.hneedle : me._sDialog.mneedle;
+            circularHolder = this._sDialog.circularHolder;
 
-        // move the needle to correct position
-        me._removeRotation(needle);
-        // mdDateTimePicker.dialog.view = false: minute mode
-        // mdDateTimePicker.dialog.view = true: hour mode
-        if (!mdDateTimePicker.dialog.view) {
-          value = me._sDialog.sDate.format('m');
 
-          // Need to desactivate for the autoClose mode as it mess things up.  If you have an idea, feel free to give it a shot !
-          if (me._autoClose !== !0) {
-            // move the fakeNeedle to correct position
-            setTimeout(function () {
-              var hOffset = circularHolder.getBoundingClientRect(),
-                  cOffset = circle.getBoundingClientRect();
-
-              fakeNeedle.setAttribute('style', 'left:' + (cOffset.left - hOffset.left) + 'px;top:' + (cOffset.top - hOffset.top) + 'px');
-            }, 300);
-          }
-        } else if (me._mode) {
-          spoke = 24;
-          value = parseInt(me._sDialog.sDate.format('H'), 10);
-          // CHANGED exception for 24 => 0 issue #58
-          if (value === 0) {
-            value = 24;
-          }
-        } else {
-          spoke = 12;
-          value = me._sDialog.sDate.format('h');
+        if (!needle) {
+          needle = mdDateTimePicker.dialog.view ? me._sDialog.hneedle : me._sDialog.mneedle;
         }
+
+        me._removeRotation(needle);
+
+        // minute mode
+        if (needle == me._sDialog.mneedle) {
+          spoke = 60;
+          value = me._sDialog.sDate.format('m');
+        } else {
+          // hour mode
+          if (me._mode) {
+            spoke = 24;
+            value = parseInt(me._sDialog.sDate.format('H'), 10);
+            // CHANGED exception for 24 => 0 issue #58
+            if (value === 0) {
+              value = 24;
+            }
+          } else {
+            spoke = 12;
+            value = me._sDialog.sDate.format('h');
+          }
+        }
+
         var rotationClass = me._calcRotation(spoke, parseInt(value, 10));
         if (rotationClass) {
           needle.classList.add(rotationClass);
@@ -896,25 +934,58 @@
         }
       }
     }, {
-      key: '_switchToTimeView',
-      value: function _switchToTimeView(me) {
-        var hourView = me._sDialog.hourView,
-            minuteView = me._sDialog.minuteView,
-            hour = me._sDialog.hour,
-            minute = me._sDialog.minute,
+      key: '_switchToHourView',
+      value: function _switchToHourView() {
+        var hourView = this._sDialog.hourView,
+            minuteView = this._sDialog.minuteView,
+            hour = this._sDialog.hour,
+            minute = this._sDialog.minute,
             activeClass = 'mddtp-picker__color--active',
             hidden = 'mddtp-picker__circularView--hidden';
 
+
         // toggle view classes
-        hourView.classList.toggle(hidden);
-        minuteView.classList.toggle(hidden);
-        hour.classList.toggle(activeClass);
-        minute.classList.toggle(activeClass);
-        // move the needle to correct position
-        // toggle the view type
-        mdDateTimePicker.dialog.view = !mdDateTimePicker.dialog.view;
-        me._toggleHourMinute();
-        me._pointNeedle(me);
+        hourView.classList.remove(hidden);
+        minuteView.classList.remove(hidden);
+        minuteView.classList.add(hidden);
+
+        hour.classList.remove(activeClass);
+        hour.classList.add(activeClass);
+        minute.classList.remove(activeClass);
+
+        mdDateTimePicker.dialog.view = !0;
+        this._setHourActive();
+      }
+    }, {
+      key: '_switchToMinuteView',
+      value: function _switchToMinuteView() {
+        var hourView = this._sDialog.hourView,
+            minuteView = this._sDialog.minuteView,
+            hour = this._sDialog.hour,
+            minute = this._sDialog.minute,
+            activeClass = 'mddtp-picker__color--active',
+            hidden = 'mddtp-picker__circularView--hidden';
+
+
+        // toggle view classes
+        hourView.classList.remove(hidden);
+        hourView.classList.add(hidden);
+        minuteView.classList.remove(hidden);
+
+        hour.classList.remove(activeClass);
+        minute.classList.remove(activeClass);
+        minute.classList.add(activeClass);
+
+        mdDateTimePicker.dialog.view = !1;
+        this._setMinuteActive();
+      }
+    }, {
+      key: '_switchToTimeView',
+      value: function _switchToTimeView(me) {
+        me._switchToHourView();
+        me._pointNeedle(me, me._sDialog.hneedle);
+        me._pointNeedle(me, me._sDialog.mneedle);
+        me._updateHeader(me._sDialog.sDate);
       }
     }, {
       key: '_switchToDateView',
@@ -946,7 +1017,7 @@
         }
         title.classList.toggle('mddtp-picker__color--active');
         subtitle.classList.toggle('mddtp-picker__color--active');
-        mdDateTimePicker.dialog.view = !mdDateTimePicker.dialog.view;
+        mdDateTimePicker.dialog.view = !1;
         setTimeout(function () {
           el.removeAttribute('disabled');
         }, 300);
@@ -956,59 +1027,57 @@
       value: function _addClockEvent() {
         var me = this,
             hourView = this._sDialog.hourView,
-            minuteView = this._sDialog.minuteView,
-            sClass = 'mddtp-picker__cell--selected';
+            minuteView = this._sDialog.minuteView;
 
+
+        // const sClass = 'mddtp-picker__cell--selected'
         hourView.onclick = function (e) {
-          var sHour = 'mddtp-hour__selected',
-              selectedHour = document.getElementById(sHour),
-              setHour = 0;
+          // const sHour = 'mddtp-hour__selected'
+          // const selectedHour = document.getElementById(sHour)
+          var setHour = 0,
+              switchToMinute = !1;
+
 
           if (e.target && e.target.nodeName === 'SPAN') {
-            // clear the previously selected hour
-            selectedHour.id = '';
-            selectedHour.classList.remove(sClass);
-            // select the new hour
-            e.target.parentNode.classList.add(sClass);
-            e.target.parentNode.id = sHour;
-            // set the sDate according to 24 or 12 hour mode
             if (me._mode) {
               setHour = parseInt(e.target.textContent, 10);
             } else if (me._sDialog.sDate.format('A') === 'AM') {
-              setHour = e.target.textContent;
+              setHour = parseInt(e.target.textContent, 10);
             } else {
               setHour = parseInt(e.target.textContent, 10) + 12;
             }
+
+            if (me._sDialog.sDate.hour() === setHour) {
+              switchToMinute = !0;
+            }
+
             me._sDialog.sDate.hour(setHour);
+            me._sDialog.tDate.hour(setHour);
             // set the display hour
             me._sDialog.hour.textContent = e.target.textContent;
             // switch the view
             me._pointNeedle(me);
-            setTimeout(function () {
-              me._switchToTimeView(me);
-            }, 700);
+            me._updateHeader(me._sDialog.sDate);
+
+            if (switchToMinute) {
+              me._switchToMinuteView();
+            }
           }
         };
-        minuteView.onclick = function (e) {
-          var sMinute = 'mddtp-minute__selected',
-              selectedMinute = document.getElementById(sMinute),
-              setMinute = 0;
 
+        minuteView.onclick = function (e) {
+          // const sMinute = 'mddtp-minute__selected'
+          // const selectedMinute = document.getElementById(sMinute)
+          var setMinute = 0;
           if (e.target && e.target.nodeName === 'SPAN') {
-            // clear the previously selected hour
-            if (selectedMinute) {
-              selectedMinute.id = '';
-              selectedMinute.classList.remove(sClass);
-            }
-            // select the new minute
-            e.target.parentNode.classList.add(sClass);
-            e.target.parentNode.id = sMinute;
-            // set the sDate minute
             setMinute = e.target.textContent;
             me._sDialog.sDate.minute(setMinute);
+            me._sDialog.tDate.minute(setMinute);
+
             // set the display minute
             me._sDialog.minute.textContent = setMinute;
             me._pointNeedle(me);
+            me._updateHeader(me._sDialog.sDate);
 
             if (me._autoClose === !0) {
               me._sDialog.ok.onclick();
@@ -1022,27 +1091,22 @@
         if (e.target && e.target.nodeName === 'SPAN' && e.target.classList.contains('mddtp-picker__cell')) {
           var day = e.target.textContent;
           currentDate = currentDate || this._sDialog.tDate.date(day);
-          var sId = 'mddtp-date__selected',
-              sClass = 'mddtp-picker__cell--selected',
-              selected = document.getElementById(sId),
-              subtitle = this._sDialog.subtitle,
-              titleDay = this._sDialog.titleDay,
-              titleMonth = this._sDialog.titleMonth;
 
-          if (selected) {
-            selected.classList.remove(sClass);
-            selected.id = '';
+          // if we are in date view, we need to change the selected cell
+          if (this._type === 'date') {
+            var el = document.getElementById('mddtp-date__selected');
+            if (el) {
+              el.id = '';
+              el.classList.remove('mddtp-picker__cell--selected');
+            }
+
+            e.target.classList.add('mddtp-picker__cell--selected');
+            e.target.id = 'mddtp-date__selected';
           }
-          e.target.classList.add(sClass);
-          e.target.id = sId;
 
           // update temp date object with the date selected
           this._sDialog.sDate = currentDate.clone();
-
-          this._fillText(this._sDialog.header_header, currentDate.format('dddd hh:mm a'));
-          this._fillText(subtitle, currentDate.year());
-          this._fillText(titleDay, currentDate.format('D'));
-          this._fillText(titleMonth, currentDate.format('MMM'));
+          this._updateHeader(this._sDialog.sDate);
 
           if (this._autoClose === !0) {
             this._sDialog.ok.onclick();
@@ -1063,10 +1127,12 @@
             past = this._past,
             future = this._future;
 
+
         left.removeAttribute('disabled');
         right.removeAttribute('disabled');
         left.classList.remove('mddtp-button--disabled');
         right.classList.remove('mddtp-button--disabled');
+
         if (m.isSame(past, 'month')) {
           left.setAttribute('disabled', '');
           left.classList.add('mddtp-button--disabled');
@@ -1085,6 +1151,7 @@
             mLeftClass = 'mddtp-picker__view--left',
             mRightClass = 'mddtp-picker__view--right',
             pause = 'mddtp-picker__view--pause';
+
 
         left.onclick = function () {
           moveStep(mRightClass, me._sDialog.previous);
@@ -1204,32 +1271,24 @@
             AM = this._sDialog.AM,
             PM = this._sDialog.PM;
 
-        AM.onclick = function () {
-          // let m = me._sDialog.sDate.format('A')
-          // Change Locale Meridiem to AM/PM String
-          var m = 'AM';
-          if (me._sDialog.sDate._locale.isPM(me._sDialog.sDate.format('A'))) {
-            m = 'PM';
-          }
-          if (m === 'PM') {
-            me._sDialog.sDate.subtract(12, 'h');
-            AM.classList.toggle('mddtp-picker__color--active');
-            PM.classList.toggle('mddtp-picker__color--active');
-          }
-        };
-        PM.onclick = function () {
-          // let m = me._sDialog.sDate.format('A')
-          // Change Locale Meridiem to AM/PM String
+
+        function toggle() {
           var m = 'AM';
           if (me._sDialog.sDate._locale.isPM(me._sDialog.sDate.format('A'))) {
             m = 'PM';
           }
           if (m === 'AM') {
             me._sDialog.sDate.add(12, 'h');
-            AM.classList.toggle('mddtp-picker__color--active');
-            PM.classList.toggle('mddtp-picker__color--active');
+          } else {
+            me._sDialog.sDate.subtract(12, 'h');
           }
-        };
+
+          AM.classList.toggle('mddtp-picker__color--active');
+          PM.classList.toggle('mddtp-picker__color--active');
+          me._updateHeader(me._sDialog.sDate);
+        }
+
+        AM.onclick = PM.onclick = toggle;
       }
     }, {
       key: '_dragDial',
@@ -1343,42 +1402,50 @@
       key: '_attachEventHandlers',
       value: function _attachEventHandlers() {
         var me = this,
+            timebutton = this._sDialog.timebutton,
+            calendarbutton = this._sDialog.calendarbutton,
             now = this._sDialog.now,
             ok = this._sDialog.ok,
             cancel = this._sDialog.cancel,
             onCancel = new CustomEvent('onCancel'),
             onOk = new CustomEvent('onOk');
 
+
+        if (timebutton) {
+          timebutton.onclick = me.toggleType.bind(me);
+        }
+
+        if (calendarbutton) {
+          calendarbutton.onclick = me.toggleType.bind(me);
+        }
+
         if (now) now.onclick = function (e) {
-          me._cellClicked({ target: me.todaycell }, (0, _moment2.default)());
           now.blur();
-          // move into view
-          var diff, sameMonth;
 
-          function gotoCorrectMonth() {
-            diff = me._sDialog.tDate.diff(me._sDialog.sDate, 'days');
-            sameMonth = me._sDialog.tDate.isSame(me._sDialog.sDate, 'month');
+          // remove the already selected 
+          var el = document.getElementById('mddtp-date__selected');
 
-            if (!sameMonth) {
-              // which direction we should go
-              if (diff > 0) {
-                me._sDialog.left.click();
-              } else {
-                me._sDialog.right.click();
-              }
-
-              setTimeout(gotoCorrectMonth, 500);
-            }
+          if (el) {
+            el.id = '';
+            el.classList.remove('mddtp-picker__cell--selected');
           }
 
-          setTimeout(gotoCorrectMonth, 0);
+          var m = (0, _moment2.default)();
+          me._sDialog.tDate = me._sDialog.sDate.clone();
+          me._sDialog.tDate.day(m.day());
+          me._sDialog.tDate.month(m.month());
+          me._sDialog.tDate.year(m.year());
+          me._initViewHolder();
+          me._cellClicked({ target: me.todaycell }, me._sDialog.tDate);
         };
+
         cancel.onclick = function () {
           me.toggle();
           if (me._trigger) {
             me._trigger.dispatchEvent(onCancel);
           }
         };
+
         ok.onclick = function () {
           me._init = me._sDialog.sDate;
           me.toggle();
@@ -1391,6 +1458,8 @@
       key: '_setButtonText',
       value: function _setButtonText() {
         if (this._sDialog.now) this._sDialog.now.textContent = this._now;
+        if (this._sDialog.timebutton) this._sDialog.timebutton.textContent = this._timebutton;
+        if (this._sDialog.calendarbutton) this._sDialog.calendarbutton.textContent = this._calendarbutton;
         this._sDialog.cancel.textContent = this._cancel;
         this._sDialog.ok.textContent = this._ok;
       }
@@ -1433,7 +1502,7 @@
     }, {
       key: '_addId',
       value: function _addId(el, id) {
-        el.id = 'mddtp-' + this._type + '__' + id;
+        el.id = 'mddtp__' + id;
       }
     }, {
       key: '_addClass',

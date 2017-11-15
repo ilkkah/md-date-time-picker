@@ -53,10 +53,9 @@
   .mddtp-picker__header {
     text-align: center;
     box-sizing: border-box;
-    width: 100px;
     background-color: $picker-header-color;
     font-weight: 400;
-    #mddtp-date__header_header {
+    #mddtp__header_header {
       color: $color-secondary-text;
       font-size: 14px;
       background-color: $picker-header-header-color;
@@ -69,22 +68,14 @@
       color: $color-secondary-text;
       font-size: 28px;
     }
-    .mddtp-picker__subtitle {
-      font-size: 24px;
-    }
     .mddtp-picker__am_pm {
       color: $color-am_pm-text;
     }
-    .mddtp-picker__subtitle {
-      color: $color-secondary-text;
-      cursor: pointer;
-      font-size: 20px;
-    }
-    #mddtp-date__titleMonth {
+    #mddtp__titleMonth {
       font-size: 20px;
       text-transform: uppercase;
     }
-    #mddtp-date__titleDay {
+    #mddtp__titleDay {
       font-size: 40px;
       line-height: 1.1;
     }
@@ -102,45 +93,38 @@
       text-align: right;
     }
   }
-  .mddtp-picker__header,
-  .mddtp-picker__body {
-    display: table-cell;
-    vertical-align: top;
-    height: 100%;
-  }
 }
 //date component dialog
-.mddtp-picker-date {
-  .mddtp-picker__left {
-    left: 4px;
+.mddtp-picker__left {
+  left: 4px;
+}
+.mddtp-picker__right {
+  right: 4px;
+}
+.mddtp-picker__left,
+.mddtp-picker__right {
+  position: absolute;
+  text-align: center;
+  line-height: 48px;
+  height: 48px;
+  width: 48px;
+  top: 4px;
+  border-radius: 50%;
+  transition: 0.3s background-color;
+  cursor: pointer;
+  &:hover,
+  &:focus {
+    background-color: $md-button-color--focus;
   }
-  .mddtp-picker__right {
-    right: 4px;
+  &:active {
+    background-color: $md-button-color--active;
   }
-  .mddtp-picker__left,
-  .mddtp-picker__right {
-    position: absolute;
-    text-align: center;
-    line-height: 48px;
-    height: 48px;
-    width: 48px;
-    top: 4px;
-    border-radius: 50%;
-    transition: 0.3s background-color;
-    cursor: pointer;
-    &:hover,
-    &:focus {
-      background-color: $md-button-color--focus;
-    }
-    &:active {
-      background-color: $md-button-color--active;
-    }
-    &:disabled {
-      background-repeat: no-repeat;
-      background-position: center;
-    }
+  &:disabled {
+    background-repeat: no-repeat;
+    background-position: center;
   }
 }
+
 .mddtp-picker__body {
   .mddtp-picker__viewHolder {
     width: 314px;
@@ -160,7 +144,6 @@
       transition: .3s cubic-bezier(.42, 0, .58, 1);
       .mddtp-picker__month {
         display: inline-block;
-        padding: 18px;
         font-size: 13px;
         font-weight: 600;
         color: $picker-primary-text-theme-color;
@@ -176,6 +159,7 @@
       transition: none;
     }
     .mddtp-picker__grid {
+      margin-top: 18px;
       padding: 8px 14px 0;
       span {
         display: inline-block;
@@ -245,10 +229,9 @@
   }
 }
 //time component dialog
-.mddtp-picker-time {
+.mddtp-picker--time {
   .mddtp-picker__header {
     vertical-align: middle;
-    width: 125px;
 
     .mddtp-picker__title {
       text-align: right;
@@ -261,18 +244,24 @@
         margin: 0 2px;
       }
     }
-    .mddtp-picker__subtitle {
-      margin-top: 8px;
-      text-align: center;
-
-      div {
-        margin-top: 2px;
-      }
-    }
   }
 
-  // netTrek
-  // disable -webkit-tap-highlight-color for iOS
+  #mddtp__subtitle {
+    position: absolute;
+    z-index: 9;
+    div.mddtp-picker__color--active {
+      z-index: 10;
+      background-color: #8bc34a;
+      border-radius: 30px;
+      color: #fff;
+    }
+
+    div {
+      padding: 3px 10px;
+      cursor: pointer;
+      position: absolute;
+    }
+  }
 
   .mddtp-picker__circularView,
   .mddtp-time__circularHolder {
@@ -307,6 +296,7 @@
       height: 36px;
       line-height: 36px;
       text-align: center;
+      user-select: none;
       margin-right: 8px;
     }
     &--selected {
@@ -329,7 +319,7 @@
   cursor: move; 
 }
 
-#mddtp-time__hneedle.mddtp-picker__selection {
+#mddtp__hneedle.mddtp-picker__selection {
   width: calc(50% + 5px);
 
   .mddtp-picker__line {
@@ -337,7 +327,7 @@
   }
 }
 
-#mddtp-time__mneedle.mddtp-picker__selection {
+#mddtp__mneedle.mddtp-picker__selection {
   span.mddtp-picker__line {
     height: 1px;
   }
@@ -364,8 +354,8 @@
 
   span {
     display: inline-block;    
-    height: 5px;
     vertical-align: middle;
+    height: 5px;
 
     &.mddtp-picker__dot {
       width: 16px;
@@ -489,12 +479,40 @@
 }
 
 
+.mddtp-picker--portrait.mddtp-picker--date {
+  .mddtp-picker__circularHolder, #mddtp__calendarbutton, .mddtp-picker__time-title, .mddtp-picker__time-subtitle {
+    display: none;
+  }
+}
+
+.mddtp-picker--portrait.mddtp-picker--time {
+  .mddtp-picker__viewHolder, #mddtp__timebutton, #mddtp__now, #mddtp__left, #mddtp__right, .mddtp-picker__date-title {
+    display: none;
+  }
+}
+
 
 // netTrek
 // disable selection
-
+/*
 .mddtp-picker-date,
 .mddtp-picker-time {
   @include prefixer(user-select, none, webkit moz ms spec);
-  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-touch-callout: none; // iOS Safari 
+}
+*/
+
+
+#mddtp-picker.mddtp-picker {
+  transition: all 0.3s;
+}
+
+#mddtp-picker.mddtp-picker.mddtp-picker--date {
+  width: 314px;
+  height: 564px
+}
+
+#mddtp-picker.mddtp-picker.mddtp-picker--time {
+  width: 290px;
+  height: 463px
 }
