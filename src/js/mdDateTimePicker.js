@@ -182,6 +182,7 @@ class mdDateTimePicker {
   *
   */
   toggle () {
+    console.log('toggle', mdDateTimePicker.dialog.state)
     this._selectDialog()
     // work according to the current state of the dialog
     if (mdDateTimePicker.dialog.state) {
@@ -245,6 +246,9 @@ class mdDateTimePicker {
   _showDialog () {
     const me = this
     const zoomIn = 'zoomIn'
+    this._type = 'date'
+    mdDateTimePicker.dialog.view = false
+    this._switchToDateView(this._sDialog.title, this)
     mdDateTimePicker.dialog.state = true
     this._sDialog.picker.classList.remove('mddtp-picker--date')
     this._sDialog.picker.classList.remove('mddtp-picker--time')
@@ -268,57 +272,14 @@ class mdDateTimePicker {
   */
   _hideDialog () {
     const me = this
-    const years = this._sDialog.years
-    const title = me._sDialog.title
-    const subtitle = me._sDialog.subtitle
-    const viewHolder = this._sDialog.viewHolder
-    const AM = this._sDialog.AM
-    const PM = this._sDialog.PM
-    const minute = this._sDialog.minute
-    const hour = this._sDialog.hour
-    const minuteView = this._sDialog.minuteView
-    const hourView = this._sDialog.hourView
-    const picker = this._sDialog.picker
-    const hneedle = this._sDialog.hneedle
-    const mneedle = this._sDialog.mneedle
-    const dotSpan = this._sDialog.dotSpan
-    const active = 'mddtp-picker__color--active'
-    const inactive = 'mddtp-picker--inactive'
-    const invisible = 'mddtp-picker__years--invisible'
-    const zoomIn = 'zoomIn'
-    const zoomOut = 'zoomOut'
-    const hidden = 'mddtp-picker__circularView--hidden'
-    const selection = 'mddtp-picker__selection'
+
     mdDateTimePicker.dialog.state = false
     mdDateTimePicker.dialog.view = true
-    this._sDialog.picker.classList.add(zoomOut)
-    // reset classes
-    if (this._type === 'date') {
-      years.classList.remove(zoomIn, zoomOut)
-      years.classList.add(invisible)
-      title.classList.remove(active)
-      subtitle.classList.add(active)
-      viewHolder.classList.remove(zoomOut)
-    } else {
-      AM.classList.remove(active)
-      PM.classList.remove(active)
-      minute.classList.remove(active)
-      hour.classList.add(active)
-      minuteView.classList.add(hidden)
-      hourView.classList.remove(hidden)
-      subtitle.setAttribute('style', 'display: none')
-      dotSpan.setAttribute('style', 'display: none')
-      hneedle.className = selection
-      mneedle.className = selection
-    }
+    this._sDialog.picker.classList.add('zoomOut')
+
     setTimeout(() => {
-      // remove portrait mode
-      me._sDialog.picker.classList.remove('mddtp-picker--portrait')
-      me._sDialog.picker.classList.remove(zoomOut)
-      me._sDialog.picker.classList.add(inactive)
-      // clone elements and add them again to clear events attached to them
-      const pickerClone = picker.cloneNode(true)
-      picker.parentNode.replaceChild(pickerClone, picker)
+      me._sDialog.picker.classList.remove('zoomOut')
+      me._sDialog.picker.classList.add('mddtp-picker--inactive')
     }, 300)
   }
 
@@ -612,8 +573,8 @@ class mdDateTimePicker {
     this._attachEventHandlers()
     this._changeM()
     // this._dragDial()
-    this._switchToView(hour)
-    this._switchToView(minute)
+    // this._switchToView(hour)
+    // this._switchToView(minute)
     this._addClockEvent()
     this._setButtonText()
     this._setHourActive()
@@ -743,28 +704,21 @@ class mdDateTimePicker {
     minuteView.appendChild(docfrag)
   }
 
-  _updateHeader (m) {
-    this._fillText(this._sDialog.header_header, m.format('dddd hh:mm a'))
-    this._fillText(this._sDialog.subtitle, m.year())
-    this._fillText(this._sDialog.titleDay, m.format('D'))
-    this._fillText(this._sDialog.titleMonth, m.format('MMM'))
-  }
-
   /**
   * [initDateDialog to initiate the date picker dialog usage e.g initDateDialog(moment())]
   * @param  {moment} m [date for today or current]
   */
   _buildDateDialog (m) {
     this._updateHeader(m)
-    this._initYear()
-    this._initViewHolder()
+    this._buildYear()
+    this._buildViewHolder()
     this._attachEventHandlers()
     this._changeMonth()
-    this._switchToView(this._sDialog.title)
+    // this._switchToView(this._sDialog.title)
     this._setButtonText()
   }
 
-  _initViewHolder () {
+  _buildViewHolder () {
     let m = this._sDialog.tDate
     const current = this._sDialog.current
     const previous = this._sDialog.previous
@@ -789,6 +743,9 @@ class mdDateTimePicker {
     // get the .mddtp-picker__month element using innerDivs[0]
     const innerDivs = view.getElementsByTagName('div')
     this._fillText(innerDivs[0], displayMonth)
+
+    innerDivs[0].onclick = this._switchToYearView.bind(this)
+
     const docfrag = document.createDocumentFragment()
     // get the .mddtp-picker__tr element using innerDivs[3]
     const tr = innerDivs[3]
@@ -850,13 +807,13 @@ class mdDateTimePicker {
   }
 
   /**
-  * [_initYear Adds year elements]
+  * [_buildYear Adds year elements]
   *
-  * @method _initYear
+  * @method _buildYear
   *
   * @return {type}  [description]
   */
-  _initYear () {
+  _buildYear () {
     const years = this._sDialog.years
     const currentYear = this._sDialog.tDate.year()
     const docfrag = document.createDocumentFragment()
@@ -865,6 +822,7 @@ class mdDateTimePicker {
     for (let year = past; year <= future; year++) {
       const li = document.createElement('li')
       li.textContent = year
+      li.dataset.year = year
       if (year === currentYear) {
         li.id = 'mddtp-date__currentYear'
         li.classList.add('mddtp-picker__li--current')
@@ -879,6 +837,13 @@ class mdDateTimePicker {
     years.appendChild(docfrag)
     // attach event handler to the ul to get the benefit of event delegation
     this._changeYear(years)
+  }
+
+  _updateHeader (m) {
+    this._fillText(this._sDialog.header_header, m.format('dddd hh:mm a'))
+    this._fillText(this._sDialog.subtitle, m.year())
+    this._fillText(this._sDialog.titleDay, m.format('D'))
+    this._fillText(this._sDialog.titleMonth, m.format('MMM'))
   }
 
   _removeRotation(needle) {
@@ -926,40 +891,6 @@ class mdDateTimePicker {
     const rotationClass = me._calcRotation(spoke, parseInt(value, 10))
     if (rotationClass) {
       needle.classList.add(rotationClass)
-    }
-  }
-
-  /**
-  * [_switchToView Adds event handler for the feature: switch between date and year view in date dialog]
-  *
-  * @method _switchToView
-  *
-  * @param  {type} picker [description]
-  *
-  * @param  {type} el     [description]
-  *
-  */
-  _switchToView (el) {
-    const me = this
-    // attach the view change button
-    if (this._type === 'date') {
-      el.onclick = function () {
-        me._switchToDateView(el, me)
-      }
-    } else {
-      if (this._inner24 === true && me._mode) {
-        if (parseInt(me._sDialog.sDate.format('H'), 10) > 12) {
-          me._sDialog.hneedle.classList.add('mddtp-picker__cell--rotate24')
-          me._sDialog.mneedle.classList.add('mddtp-picker__cell--rotate24')
-        } else {
-          me._sDialog.hneedle.classList.remove('mddtp-picker__cell--rotate24')
-          me._sDialog.mneedle.classList.remove('mddtp-picker__cell--rotate24')
-        }
-      }
-
-      el.onclick = function () {
-        me._switchToTimeView(me)
-      }
     }
   }
 
@@ -1019,6 +950,33 @@ class mdDateTimePicker {
     me._pointNeedle(me, me._sDialog.mneedle)
     me._updateHeader(me._sDialog.sDate)
   }
+
+
+  _switchToYearView () {
+    const selectedYear = document.getElementById('mddtp-date__currentYear')
+    const years = this._sDialog.years
+    const viewHolder = this._sDialog.viewHolder
+
+    if (selectedYear) {
+      selectedYear.id = ''
+      selectedYear.classList.remove('mddtp-picker__li--current')
+    }
+
+    const currentYear = years.querySelector('[data-year="'+this._sDialog.tDate.year()+'"]')
+
+    if (currentYear) {
+      currentYear.id = 'mddtp-date__currentYear'
+      currentYear.classList.add('mddtp-picker__li--current')
+    }
+
+    mdDateTimePicker.dialog.view = true
+    viewHolder.classList.add('zoomOut')
+    years.classList.remove('mddtp-picker__years--invisible')
+    years.classList.add('zoomIn')
+    // scroll into the view
+    currentYear && currentYear.scrollIntoViewIfNeeded && currentYear.scrollIntoViewIfNeeded()
+  }
+
   /**
   * [_switchToDateView the actual switchToDateView function so that it can be called by other elements as well]
   *
@@ -1029,33 +987,25 @@ class mdDateTimePicker {
   *
   */
   _switchToDateView (el, me) {
+    console.log('_switchToDateView')
     el.setAttribute('disabled', '')
     const viewHolder = me._sDialog.viewHolder
     const years = me._sDialog.years
-    const title = me._sDialog.title
     const subtitle = me._sDialog.subtitle
-    const currentYear = document.getElementById('mddtp-date__currentYear')
-    // mdDateTimePicker.dialog.view = true: years mode
-    // mdDateTimePicker.dialog.view = false: normal calendar mode
-    if (mdDateTimePicker.dialog.view) {
-      viewHolder.classList.add('zoomOut')
-      years.classList.remove('mddtp-picker__years--invisible')
-      years.classList.add('zoomIn')
-      // scroll into the view
-      currentYear.scrollIntoViewIfNeeded && currentYear.scrollIntoViewIfNeeded()
-    } else {
-      years.classList.add('zoomOut')
-      viewHolder.classList.remove('zoomOut')
-      viewHolder.classList.add('zoomIn')
-      setTimeout(() => {
-        years.classList.remove('zoomIn', 'zoomOut')
-        years.classList.add('mddtp-picker__years--invisible')
-        viewHolder.classList.remove('zoomIn')
-      }, 300)
-    }
-    title.classList.toggle('mddtp-picker__color--active')
-    subtitle.classList.toggle('mddtp-picker__color--active')
+
     mdDateTimePicker.dialog.view = false
+
+    years.classList.add('zoomOut')
+    viewHolder.classList.remove('zoomOut')
+    viewHolder.classList.add('zoomIn')
+
+    setTimeout(() => {
+      years.classList.remove('zoomIn', 'zoomOut')
+      years.classList.add('mddtp-picker__years--invisible')
+      viewHolder.classList.remove('zoomIn')
+    }, 300)
+
+
     setTimeout(() => {
       el.removeAttribute('disabled')
     }, 300)
@@ -1255,7 +1205,7 @@ class mdDateTimePicker {
         } else {
           me._sDialog.tDate = me._getMonth(me._sDialog.tDate, 1)
         }
-        me._initViewHolder()
+        me._buildViewHolder()
       }, 350)
       setTimeout(() => {
         if (!(left.classList.contains('mddtp-button--disabled'))) {
@@ -1279,6 +1229,7 @@ class mdDateTimePicker {
   *
   */
   _changeYear (el) {
+    console.log('_changeYear', el);
     const me = this
     el.onclick = function (e) {
       if (e.target && e.target.nodeName === 'LI') {
@@ -1294,7 +1245,7 @@ class mdDateTimePicker {
         // set the tdate to it
         me._sDialog.tDate.year(parseInt(e.target.textContent, 10))
         // update the dialog
-        me._initViewHolder()
+        me._buildViewHolder()
       }
     }
   }
@@ -1479,7 +1430,7 @@ class mdDateTimePicker {
       me._sDialog.tDate.day(m.day())
       me._sDialog.tDate.month(m.month())
       me._sDialog.tDate.year(m.year())
-      me._initViewHolder()
+      me._buildViewHolder()
       me._cellClicked({target: me.todaycell}, me._sDialog.tDate)
     }
 

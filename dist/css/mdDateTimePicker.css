@@ -129,7 +129,8 @@
       display: inline-block;
       font-size: 13px;
       font-weight: 600;
-      color: rgba(0, 0, 0, 0.87); }
+      color: rgba(0, 0, 0, 0.87);
+      cursor: pointer; }
   .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__view--left {
     transform: translate3d(-200%, 0, 0); }
   .mddtp-picker__body .mddtp-picker__viewHolder .mddtp-picker__view--right {

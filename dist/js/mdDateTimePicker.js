@@ -186,6 +186,7 @@
     }, {
       key: 'toggle',
       value: function toggle() {
+        console.log('toggle', mdDateTimePicker.dialog.state);
         this._selectDialog();
         // work according to the current state of the dialog
         if (mdDateTimePicker.dialog.state) {
@@ -224,6 +225,9 @@
         var me = this,
             zoomIn = 'zoomIn';
 
+        this._type = 'date';
+        mdDateTimePicker.dialog.view = !1;
+        this._switchToDateView(this._sDialog.title, this);
         mdDateTimePicker.dialog.state = !0;
         this._sDialog.picker.classList.remove('mddtp-picker--date');
         this._sDialog.picker.classList.remove('mddtp-picker--time');
@@ -241,59 +245,15 @@
     }, {
       key: '_hideDialog',
       value: function _hideDialog() {
-        var me = this,
-            years = this._sDialog.years,
-            title = me._sDialog.title,
-            subtitle = me._sDialog.subtitle,
-            viewHolder = this._sDialog.viewHolder,
-            AM = this._sDialog.AM,
-            PM = this._sDialog.PM,
-            minute = this._sDialog.minute,
-            hour = this._sDialog.hour,
-            minuteView = this._sDialog.minuteView,
-            hourView = this._sDialog.hourView,
-            picker = this._sDialog.picker,
-            hneedle = this._sDialog.hneedle,
-            mneedle = this._sDialog.mneedle,
-            dotSpan = this._sDialog.dotSpan,
-            active = 'mddtp-picker__color--active',
-            inactive = 'mddtp-picker--inactive',
-            invisible = 'mddtp-picker__years--invisible',
-            zoomIn = 'zoomIn',
-            zoomOut = 'zoomOut',
-            hidden = 'mddtp-picker__circularView--hidden',
-            selection = 'mddtp-picker__selection';
+        var me = this;
 
         mdDateTimePicker.dialog.state = !1;
         mdDateTimePicker.dialog.view = !0;
-        this._sDialog.picker.classList.add(zoomOut);
-        // reset classes
-        if (this._type === 'date') {
-          years.classList.remove(zoomIn, zoomOut);
-          years.classList.add(invisible);
-          title.classList.remove(active);
-          subtitle.classList.add(active);
-          viewHolder.classList.remove(zoomOut);
-        } else {
-          AM.classList.remove(active);
-          PM.classList.remove(active);
-          minute.classList.remove(active);
-          hour.classList.add(active);
-          minuteView.classList.add(hidden);
-          hourView.classList.remove(hidden);
-          subtitle.setAttribute('style', 'display: none');
-          dotSpan.setAttribute('style', 'display: none');
-          hneedle.className = selection;
-          mneedle.className = selection;
-        }
+        this._sDialog.picker.classList.add('zoomOut');
+
         setTimeout(function () {
-          // remove portrait mode
-          me._sDialog.picker.classList.remove('mddtp-picker--portrait');
-          me._sDialog.picker.classList.remove(zoomOut);
-          me._sDialog.picker.classList.add(inactive);
-          // clone elements and add them again to clear events attached to them
-          var pickerClone = picker.cloneNode(!0);
-          picker.parentNode.replaceChild(pickerClone, picker);
+          me._sDialog.picker.classList.remove('zoomOut');
+          me._sDialog.picker.classList.add('mddtp-picker--inactive');
         }, 300);
       }
     }, {
@@ -589,8 +549,8 @@
         this._attachEventHandlers();
         this._changeM();
         // this._dragDial()
-        this._switchToView(hour);
-        this._switchToView(minute);
+        // this._switchToView(hour)
+        // this._switchToView(minute)
         this._addClockEvent();
         this._setButtonText();
         this._setHourActive();
@@ -724,27 +684,19 @@
         minuteView.appendChild(docfrag);
       }
     }, {
-      key: '_updateHeader',
-      value: function _updateHeader(m) {
-        this._fillText(this._sDialog.header_header, m.format('dddd hh:mm a'));
-        this._fillText(this._sDialog.subtitle, m.year());
-        this._fillText(this._sDialog.titleDay, m.format('D'));
-        this._fillText(this._sDialog.titleMonth, m.format('MMM'));
-      }
-    }, {
       key: '_buildDateDialog',
       value: function _buildDateDialog(m) {
         this._updateHeader(m);
-        this._initYear();
-        this._initViewHolder();
+        this._buildYear();
+        this._buildViewHolder();
         this._attachEventHandlers();
         this._changeMonth();
-        this._switchToView(this._sDialog.title);
+        // this._switchToView(this._sDialog.title)
         this._setButtonText();
       }
     }, {
-      key: '_initViewHolder',
-      value: function _initViewHolder() {
+      key: '_buildViewHolder',
+      value: function _buildViewHolder() {
         var m = this._sDialog.tDate,
             current = this._sDialog.current,
             previous = this._sDialog.previous,
@@ -772,6 +724,9 @@
         // get the .mddtp-picker__month element using innerDivs[0]
 
         this._fillText(innerDivs[0], displayMonth);
+
+        innerDivs[0].onclick = this._switchToYearView.bind(this);
+
         var docfrag = document.createDocumentFragment(),
             tr = innerDivs[3],
             firstDayOfMonth = _moment2.default.weekdays(!0).indexOf(_moment2.default.weekdays(!1, (0, _moment2.default)(m).date(1).day())),
@@ -835,8 +790,8 @@
         this._addCellClickEvent(tr, this);
       }
     }, {
-      key: '_initYear',
-      value: function _initYear() {
+      key: '_buildYear',
+      value: function _buildYear() {
         var years = this._sDialog.years,
             currentYear = this._sDialog.tDate.year(),
             docfrag = document.createDocumentFragment(),
@@ -846,6 +801,7 @@
         for (var year = past; year <= future; year++) {
           var li = document.createElement('li');
           li.textContent = year;
+          li.dataset.year = year;
           if (year === currentYear) {
             li.id = 'mddtp-date__currentYear';
             li.classList.add('mddtp-picker__li--current');
@@ -860,6 +816,14 @@
         years.appendChild(docfrag);
         // attach event handler to the ul to get the benefit of event delegation
         this._changeYear(years);
+      }
+    }, {
+      key: '_updateHeader',
+      value: function _updateHeader(m) {
+        this._fillText(this._sDialog.header_header, m.format('dddd hh:mm a'));
+        this._fillText(this._sDialog.subtitle, m.year());
+        this._fillText(this._sDialog.titleDay, m.format('D'));
+        this._fillText(this._sDialog.titleMonth, m.format('MMM'));
       }
     }, {
       key: '_removeRotation',
@@ -906,31 +870,6 @@
         var rotationClass = me._calcRotation(spoke, parseInt(value, 10));
         if (rotationClass) {
           needle.classList.add(rotationClass);
-        }
-      }
-    }, {
-      key: '_switchToView',
-      value: function _switchToView(el) {
-        var me = this;
-        // attach the view change button
-        if (this._type === 'date') {
-          el.onclick = function () {
-            me._switchToDateView(el, me);
-          };
-        } else {
-          if (this._inner24 === !0 && me._mode) {
-            if (parseInt(me._sDialog.sDate.format('H'), 10) > 12) {
-              me._sDialog.hneedle.classList.add('mddtp-picker__cell--rotate24');
-              me._sDialog.mneedle.classList.add('mddtp-picker__cell--rotate24');
-            } else {
-              me._sDialog.hneedle.classList.remove('mddtp-picker__cell--rotate24');
-              me._sDialog.mneedle.classList.remove('mddtp-picker__cell--rotate24');
-            }
-          }
-
-          el.onclick = function () {
-            me._switchToTimeView(me);
-          };
         }
       }
     }, {
@@ -988,36 +927,54 @@
         me._updateHeader(me._sDialog.sDate);
       }
     }, {
+      key: '_switchToYearView',
+      value: function _switchToYearView() {
+        var selectedYear = document.getElementById('mddtp-date__currentYear'),
+            years = this._sDialog.years,
+            viewHolder = this._sDialog.viewHolder;
+
+
+        if (selectedYear) {
+          selectedYear.id = '';
+          selectedYear.classList.remove('mddtp-picker__li--current');
+        }
+
+        var currentYear = years.querySelector('[data-year="' + this._sDialog.tDate.year() + '"]');
+
+        if (currentYear) {
+          currentYear.id = 'mddtp-date__currentYear';
+          currentYear.classList.add('mddtp-picker__li--current');
+        }
+
+        mdDateTimePicker.dialog.view = !0;
+        viewHolder.classList.add('zoomOut');
+        years.classList.remove('mddtp-picker__years--invisible');
+        years.classList.add('zoomIn');
+        // scroll into the view
+        currentYear && currentYear.scrollIntoViewIfNeeded && currentYear.scrollIntoViewIfNeeded();
+      }
+    }, {
       key: '_switchToDateView',
       value: function _switchToDateView(el, me) {
+        console.log('_switchToDateView');
         el.setAttribute('disabled', '');
         var viewHolder = me._sDialog.viewHolder,
             years = me._sDialog.years,
-            title = me._sDialog.title,
-            subtitle = me._sDialog.subtitle,
-            currentYear = document.getElementById('mddtp-date__currentYear');
+            subtitle = me._sDialog.subtitle;
 
-        // mdDateTimePicker.dialog.view = true: years mode
-        // mdDateTimePicker.dialog.view = false: normal calendar mode
-        if (mdDateTimePicker.dialog.view) {
-          viewHolder.classList.add('zoomOut');
-          years.classList.remove('mddtp-picker__years--invisible');
-          years.classList.add('zoomIn');
-          // scroll into the view
-          currentYear.scrollIntoViewIfNeeded && currentYear.scrollIntoViewIfNeeded();
-        } else {
-          years.classList.add('zoomOut');
-          viewHolder.classList.remove('zoomOut');
-          viewHolder.classList.add('zoomIn');
-          setTimeout(function () {
-            years.classList.remove('zoomIn', 'zoomOut');
-            years.classList.add('mddtp-picker__years--invisible');
-            viewHolder.classList.remove('zoomIn');
-          }, 300);
-        }
-        title.classList.toggle('mddtp-picker__color--active');
-        subtitle.classList.toggle('mddtp-picker__color--active');
+
         mdDateTimePicker.dialog.view = !1;
+
+        years.classList.add('zoomOut');
+        viewHolder.classList.remove('zoomOut');
+        viewHolder.classList.add('zoomIn');
+
+        setTimeout(function () {
+          years.classList.remove('zoomIn', 'zoomOut');
+          years.classList.add('mddtp-picker__years--invisible');
+          viewHolder.classList.remove('zoomIn');
+        }, 300);
+
         setTimeout(function () {
           el.removeAttribute('disabled');
         }, 300);
@@ -1228,7 +1185,7 @@
             } else {
               me._sDialog.tDate = me._getMonth(me._sDialog.tDate, 1);
             }
-            me._initViewHolder();
+            me._buildViewHolder();
           }, 350);
           setTimeout(function () {
             if (!left.classList.contains('mddtp-button--disabled')) {
@@ -1245,6 +1202,7 @@
     }, {
       key: '_changeYear',
       value: function _changeYear(el) {
+        console.log('_changeYear', el);
         var me = this;
         el.onclick = function (e) {
           if (e.target && e.target.nodeName === 'LI') {
@@ -1260,7 +1218,7 @@
             // set the tdate to it
             me._sDialog.tDate.year(parseInt(e.target.textContent, 10));
             // update the dialog
-            me._initViewHolder();
+            me._buildViewHolder();
           }
         };
       }
@@ -1435,7 +1393,7 @@
           me._sDialog.tDate.day(m.day());
           me._sDialog.tDate.month(m.month());
           me._sDialog.tDate.year(m.year());
-          me._initViewHolder();
+          me._buildViewHolder();
           me._cellClicked({ target: me.todaycell }, me._sDialog.tDate);
         };
 
