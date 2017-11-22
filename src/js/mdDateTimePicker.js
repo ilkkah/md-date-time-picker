@@ -268,7 +268,7 @@ class mdDateTimePicker {
 
     mdDateTimePicker.dialog.state = false
     mdDateTimePicker.dialog.view = true
-    this._sDialog.picker.classList.add('zoomOut')
+    if (this._sDialog.picker) this._sDialog.picker.classList.add('zoomOut')
 
     setTimeout(() => {
       me._sDialog.picker.classList.remove('zoomOut')

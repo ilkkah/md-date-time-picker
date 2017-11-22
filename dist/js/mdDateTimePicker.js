@@ -252,7 +252,7 @@
 
         mdDateTimePicker.dialog.state = !1;
         mdDateTimePicker.dialog.view = !0;
-        this._sDialog.picker.classList.add('zoomOut');
+        if (this._sDialog.picker) this._sDialog.picker.classList.add('zoomOut');
 
         setTimeout(function () {
           me._sDialog.picker.classList.remove('zoomOut');
